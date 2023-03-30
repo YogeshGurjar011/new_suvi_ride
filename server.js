@@ -28,7 +28,7 @@ let options = {
 };
 
 let corOption ={
-    origin:['http://localhost:3000','http://localhost:5000','http://localhost:7000'],
+    origin:['http://localhost:3000','http://localhost:5000','http://localhost:7000' , 'http://localhost:8000'],
     methods:["GET","POST","PUT","DELETE","PATCH"],
   }
 
@@ -87,5 +87,5 @@ app.get("/", (req, res) => {
   );
 });
 
-https.createServer(options, app).listen(7000,() => console.log("App running in port 7000 !"));
+https.createServer(options, app).listen(8000,() => console.log("App running in port 8000 !"));
 
