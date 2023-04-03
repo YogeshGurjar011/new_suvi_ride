@@ -4,6 +4,7 @@ const twilio = require('twilio');
 const cfSdk = require('cashfree-sdk');
 const customerBasicDetailsModel = require('../../models/customerModel/customerModel/customerBasicDetailsModel')
 const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/driverModel');
+const customerRidesModel = require('../../models/ridesModel/ridesModel.js');
 const VehicleTypeWithFareModel = require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
 const geolib = require('geolib');
 const NodeGeocoder = require('node-geocoder');
