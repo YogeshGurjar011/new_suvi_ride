@@ -978,5 +978,5 @@ const riderequest = async (req, res) => {
 
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer
+    allNearestDrivers,showFareInCustomer,riderequest
 }
