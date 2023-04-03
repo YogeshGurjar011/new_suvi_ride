@@ -666,7 +666,7 @@ const allNearestDrivers = (req, res) => {
   const { pickupLocation } = req.body;
   // Query MongoDB for all drivers within a 10km radius of the pickup location
   driverBasicDetailsMOdel.find({
-    status: "available",
+    isAvailable: true,
     Status:"online",
     currentLocation: {
       $near: {
