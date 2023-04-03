@@ -7,6 +7,11 @@ const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/dr
 const VehicleTypeWithFareModel = require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
 const geolib = require('geolib');
 const NodeGeocoder = require('node-geocoder');
+const FCM = require('fcm-node');
+const serverKey = 'AAAAjBZozHE:APA91bF2n5bBmQToPuoUowPFFWpfPx0PsJEwNjanwmiLR4YWVgSy3T6s9S7yKNQoQHNKUEXgOLE35BNrO2OfthgM02MlRDD6lpaCLJZceqCrW51TPxjFqRV4DEKVz6IJghCxqKl44hGP';
+const fcm = new FCM(serverKey);
+
+
 // Customer Genrate OTP 
 // const genrateotp = async (req, res) => {
 //     try {
@@ -773,6 +778,151 @@ const showFareInCustomer = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+// riderequest by customer
+
+const riderequest = async (req, res) => {
+  try {
+    const { customerId, pickuplocation, dropofflocation, vehicleType } = req.body;
+
+    // Find the vehicle type with the fare rate for the selected vehicle type
+    const vehicleTypeWithFare = await VehicleTypeWithFareModel.findOne({ name: vehicleType });
+    // console.log(vehicleTypeWithFare)
+    if (!vehicleTypeWithFare) {
+      return res.status(400).json({ message: "Invalid vehicle type selected." });
+    }
+    const distanceToDropoff = geolib.getDistance(
+      { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+      { latitude: dropofflocation.latitude, longitude: dropofflocation.longitude }
+    );
+    const distanceInKm = distanceToDropoff / 1000;
+    const farerate = vehicleTypeWithFare?.perKmCharge
+    const fare = Math.round(vehicleTypeWithFare?.baseFare + (distanceInKm * farerate));
+
+    // Find the nearest drivers within a 10 km radius of the pickup location
+    const drivers = await driverBasicDetailsMOdel.find({
+      Status: "online",
+      currentLocation: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [pickuplocation.longitude, pickuplocation.latitude],
+          },
+          $maxDistance: 5000, // 10km in meters
+        },
+      },
+    });
+    console.log(drivers)
+    if (drivers.length === 0) {
+      return res.status(404).json({ message: "No drivers found in the area." });
+    }
+
+    // Calculate the distance and time duration to each driver using geolib
+    const distanceToDriver = drivers.map((driver) => {
+      const distance = geolib.getDistance(
+        { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+        { latitude: driver.currentLocation.coordinates[1], longitude: driver.currentLocation.coordinates[0] }
+      );
+      const distanceToDriverInKm = distance / 1000; // Convert meters to kilometers
+      const durationToDriver = Math.round((distanceToDriverInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
+      return { driverId: driver._id, distance: distanceToDriverInKm.toFixed(2), durationToDriver, isAvailable: driver.isAvailable, deviceToken: driver.deviceToken };
+    });
+
+    // Return the list of drivers sorted by distance
+    const nearestDrivers = distanceToDriver.sort((a, b) => a.distance - b.distance);
+
+    // Save the ride request to the database
+    const scheduledTime = new Date();
+    scheduledTime.setHours(10);
+    scheduledTime.setMinutes(30);
+    scheduledTime.setSeconds(0);
+    // console.log(scheduledTime.getTime())
+    // console.log( nearestDrivers)
+    // console.log( nearestDrivers[0].driverId)
+    const ride = new customerRidesModel({
+      customerId,
+      driverId: null,
+      pickupLocation: pickuplocation.address,
+      pickupLatitude: pickuplocation.latitude,
+      pickupLongitude: pickuplocation.longitude,
+      destinationLocation: dropofflocation.address,
+      destinationLatitude: dropofflocation.latitude,
+      destinationLongitude: dropofflocation.longitude,
+      vehicleType: vehicleType,
+      numberOfPassengers: "3",
+      scheduled: true,
+      scheduledDate: Date.now(),
+      bookedFor: "",
+      fare,
+      distance: distanceInKm,
+      duration: Math.round((distanceInKm / 30) * 60), // Assuming average speed of 30 km/hr, convert km to minutes
+    });
+    const savedRide = await ride.save();
+    const customer = await customerBasicDetailsModel.findById({ _id: savedRide.customerId })
+      .populate({ path: 'fullName', select: ['customerId'] })
+    console.log(customer)
+
+    // Send the ride request to all nearest drivers
+    const messageBody = {
+      ride_id: savedRide._id,
+      customerName: customer.fullName,
+      savedRide,
+    };
+    console.log(messageBody);
+    
+    const responses = [];
+    let rideData = {
+      ride_id: savedRide._id,
+      customer_id: customer._id,
+      pickupLocation: savedRide.pickupLocation,
+      pickupLatitude: savedRide.pickupLatitude,
+      pickupLongitude: savedRide.pickupLongitude,
+      destinationLocation: savedRide.destinationLocation,
+      destinationLatitude: savedRide.destinationLatitude,
+      destinationLongitude: savedRide.destinationLongitude,
+      fare,
+      numberOfPassengers:savedRide.numberOfPassengers,
+      status:savedRide.status,
+    };
+    
+    for (let i = 0; i < nearestDrivers.length; i++) {
+      const message = {
+        to: 'eWdC1g0hSvK4j43NKVObG1:APA91bFqGeOSgkNIhbEjjRt2CvH1APUJKk9iY02KsS4ace5WVgf-ze1D4E6qARgV_PIJonoandmhi4_NDNc13kmFJJB6WVh9BkTJvMjlF1TJ-1BuXR-Z3x9bPL49yZZd76F8voGaW7qu',
+        notification: {
+          title: 'test',
+          body: `new ride request by ${customer.fullName}`,
+          data:rideData,
+          delivery_receipt_requested: true,
+        },
+      };
+    
+      fcm.send(message, function (err, resp) {
+        if (err) {
+          console.log('Error sending message:', err);
+          responses.push({
+            message: 'Error sending message:',
+            err,
+          });
+        } else {
+          console.log('Successfully sent message:', resp);
+          responses.push({
+            message: 'Successfully sent message:',
+            resp,
+          });
+        }
+        if (responses.length === nearestDrivers.length) {
+          res.status(200).json({
+            message: 'Ride request sent to nearest drivers.',
+            ride: rideData,
+          });
+        }
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Server error.', error });
   }
 };
 // const showFareInCustomer = async (req, res) => {
