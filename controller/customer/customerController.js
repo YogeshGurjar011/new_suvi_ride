@@ -687,7 +687,7 @@ const allNearestDrivers = (req, res) => {
       );
       const distanceInKm = distance / 1000; // Convert meters to kilometers
       const duration = Math.round((distanceInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
-      return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] };
+      return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] ,vehicle:driver.vehicleType};
     });
     // Return the list of drivers sorted by distance
     const nearestDrivers = driverDistances.sort((a, b) => a.distance - b.distance);
