@@ -48,6 +48,8 @@ router.put('/driver/updateCurrentLocation/:_id',driverValidation,driverControlle
 
 router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
 
+router.patch('/driver/updatePersonalDetails',driverValidation,upload.single('profilePhoto'),driverController.updatePersonalDetails);
+
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
 
 router.post('/driver/driverLoginWithSocial',driverController.driverLoginWithSocial);

@@ -248,7 +248,7 @@ const driverLogin = async (req, res) => {
             if (newDriverResult) {
                 res.status(200).send({
                     success: true,
-                    data: { language: newDriverResult.language, mobileNumber: newDriverResult.mobileNumber ,deviceToken: newDriverResult.deviceToken},
+                    data: { language: newDriverResult.language, mobileNumber: newDriverResult.mobileNumber},
                     message: 'Mobile Number Verified',
                     nextScreen: 'registration'
                 })
@@ -274,7 +274,7 @@ const driverLogin = async (req, res) => {
                         selfie: result[0].selfie,
                         Status: result[0].Status,
                         token: result[0].token,
-                        deviceToken: result[0].deviceToken
+                        // deviceToken: result[0].deviceToken
                     },
                     nextScreen: 'registration'
                 })
@@ -944,6 +944,86 @@ const deleteDriver = async (req, res) => {
     }
 }
 
+// Driver Update Personal Details
+const updatePersonalDetails = async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decodeToken = jwt.decode(token);
+        const driverId = decodeToken.driverId;
+
+        const mobileNumber = req.body.mobileNumber
+        const fullName = req.body.fullName
+        const address = req.body.address
+
+        if (mobileNumber && !/^\d{10}$/.test(mobileNumber)) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: 'Please provide a valid 10-digit mobile number.'
+            });
+        }
+        if (fullName && fullName.trim().length < 2) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: 'Please Enter Valid FullName'
+            })
+        }
+
+        const result = await driverBasicDetailsMOdel.find({ driverId })
+            .populate({ path: "language", select: ["name"] });
+        if (result) {
+            const filter = { driverId }
+            const update = {}
+            if (req.file) {
+                update.profilePhoto = req.file.filename;
+            }
+            if (mobileNumber) {
+                update.mobileNumber = mobileNumber;
+            }
+            if(fullName) {
+                update['drivingLicence.fullName'] = fullName;
+            }
+            if(address) {
+                update['drivingLicence.address'] = address;
+            }
+            const options = { new: true }
+            const selectedFields = { profilePhoto: 1, mobileNumber: 1, 'drivingLicence.fullName': 1, 'drivingLicence.address': 1 }
+            const updatedResult = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options).select(selectedFields)
+                .populate({ path: 'language', select: ['name'] });
+            if (updatedResult) {
+                res.status(200).send({
+                    success: true,
+                    successCode: 200,
+                    message: 'Personal Details Updated Successfully',
+                    data: [updatedResult]
+                })
+            }
+            else {
+                res.status(400).send({
+                    success: false,
+                    successCode: 400,
+                    message: 'Cant Update Personal Details'
+                })
+            }
+        }
+        else {
+            res.status(404).send({
+                success: false,
+                successcode: 404,
+                message: 'Data not found'
+            })
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            successCode: 500,
+            message: "Internal Server Error",
+            error: error.message
+        })
+    }
+}
+
 // Logout Driver
 const driverLogout = async (req, res) => {
     try {
@@ -1098,6 +1178,6 @@ module.exports = {
     driverLogin,
     driverDrivingLicence, driverVehicleDetails, driverAddBankDetails, driverTakeSelfie,
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
-    totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,
+    totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
     driverLoginWithSocial
 }
