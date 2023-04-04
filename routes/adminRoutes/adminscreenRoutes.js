@@ -10,7 +10,7 @@ router.use(function(req,res,next){
     res.header('Access-Controll-Allow-origin','*');
     res.header('Access-Controll-Allow-Methods','*');
     res.header('Access-Controll-Allow-Headers','*');
-    //next();
+    next();
 });
 
 const storage = multer.diskStorage({
