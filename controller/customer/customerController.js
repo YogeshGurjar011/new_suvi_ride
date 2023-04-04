@@ -1120,6 +1120,7 @@ const customerLogout = (req, res) => {
 
     return Promise.resolve({
       message: "User logged out successfully",
+      nextScreen: "loginScreeen",
       data: { mobileNumber: result.mobileNumber },
     });
   })
