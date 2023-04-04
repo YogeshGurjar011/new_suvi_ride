@@ -671,8 +671,9 @@ const deleteCustomer = async(req,res)=>{
       res.status(200).send({
         success:true,
         successCode:200,
-        data:result,
-        message:'cutomer deleted successfully'
+        message:'customer delete successfully',
+        nextScreen: "loginScreen",
+        data:result
       })
     }
     else{
