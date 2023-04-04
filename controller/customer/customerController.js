@@ -1059,6 +1059,46 @@ const riderequest = async (req, res) => {
 //   }
 // };
 
+// all rides by customer
+const allRidesByCustomer = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+
+    // Decode token to get Mobile Number 
+    const decodedToken = jwt.decode(token);
+    const customerId = decodedToken.userId;
+
+    await customerRidesModel.find({ customerId: customerId })
+      .exec((err, resp) => {
+        if (err) {
+          res.status(422).send({
+            message: err.message,
+            error: err
+          })
+        }
+        else {
+          if (resp) {
+            res.status(200).send({
+              message: "All Rides By Customer",
+              count: resp.length,
+              data: resp
+            })
+          }
+          else {
+            res.status(200).send({
+              message: "Not Found Any Rides"
+            })
+          }
+        }
+      })
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 //customer Logout
 const customerLogout = (req, res) => {
 
@@ -1097,5 +1137,5 @@ const customerLogout = (req, res) => {
 
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer,riderequest,customerLogout
+    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout
 }
