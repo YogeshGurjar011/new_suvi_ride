@@ -202,78 +202,160 @@ const fcm = new FCM(serverKey);
 // }
 
 // Customer Login
-const CustmerLogin = async(req, res) => {
-    return new Promise(async (resolve, reject) => {
-      if (!req || !res || !req.body || !req.body.mobileNumber || !/^\d{10}$/.test(req.body.mobileNumber)) {
-        return reject({ status: 400, message: 'Please provide a valid 10-digit mobile number.' });
-      }
+
+const CustmerLogin = async (req, res) => {
+  return new Promise(async (resolve, reject) => {
+  if (!req || !res || !req.body || !req.body.mobileNumber || !/^\d{10}$/.test(req.body.mobileNumber)) {
+  return reject({ status: 400, message: 'Please provide a valid 10-digit mobile number.' });
+  }
+  try {
+    const { language, mobileNumber, fcmToken } = req.body;
   
-      try {
-        const { language, mobileNumber,fcmToken } = req.body;
-  
-        const existingUser = await customerBasicDetailsModel.find({ mobileNumber }).exec();
-        if (existingUser.length === 0) {
-          const newUser = new customerBasicDetailsModel({
-            mobileNumber: mobileNumber,
-            language: language,
-            fcmToken:fcmToken
-            // email:"",
-            // socialId:"",
-            // socialMediaType:""
-          });
-  
-          await newUser.save();
-  
-          return resolve({
-            status: 200,
-            data: {
-              success: true,
-              successCode :200,
-              message: 'New User added successfully',
-              nextScreen: 'registration',
-              data: newUser,
-            },
-          });
-        } else {
-          const result = existingUser[0];
-          if (result.fullName == '') {
-            return resolve({
-              status: 200,
-              data: {
-                success: true,
-                successCode:200,
-                message:'This user verify its number already',
-                nextScreen: 'registration',
-                data:result
-              },
-            });
-          } else {
-            return resolve({
-              status: 200,
-              data: {
-                success: true,
-                successCode:200,
-                message: "User already Registred",
-                nextScreen: 'permission',
-                data: result,
-              },
-            });
-          }
-        }
-      } catch (error) {
-        console.error(error);
-        return reject({ status: 500, message: 'Internal Server Error' });
-      }
-    })
-      .then((response) => {
-        const { status, data } = response;
-        return res.status(status).json(data);
-      })
-      .catch((error) => {
-        const { status, message } = error;
-        return res.status(status).json({ message });
+    const existingUser = await customerBasicDetailsModel.find({ mobileNumber })
+    .populate({ path: "language", select: ["name"] })
+    .exec();
+    console.log(existingUser)
+    if (existingUser.length === 0) {
+      const newUser = new customerBasicDetailsModel({
+        mobileNumber: mobileNumber,
+        language: language,
+        fcmToken: fcmToken
+        // email:"",
+        // socialId:"",
+        // socialMediaType:""
       });
+  
+      await newUser.save();
+  
+      return resolve({
+        status: 200,
+        data: {
+          success: true,
+          successCode: 200,
+          message: 'New User added successfully',
+          nextScreen: 'registration',
+          data: newUser,
+        },
+      });
+    } else {
+      const result = existingUser[0];
+      result.fcmToken = fcmToken;
+      await result.save();
+  
+      if (result.fullName == '') {
+        return resolve({
+          status: 200,
+          data: {
+            success: true,
+            successCode: 200,
+            message: 'This user verify its number already',
+            nextScreen: 'registration',
+            data:{ _id:result._id, language:result.language._id, fullName:result.fullName, mobileNumber:result.mobileNumber,email:result.email,fcmToken:result.fcmToken, token:result.token}
+          },
+        });
+      } else {
+        const token = jwt.sign({ userId: result._id, mobileNumber: result.mobileNumber,language: result.language.name, fullName: result.fullName, email: result.email  },  "theseissecretkey");
+        result.token = token;
+        await result.save();
+        return resolve({
+          status: 200,
+          data: {
+            success: true,
+            successCode: 200,
+            message: "User already Registred",
+            nextScreen: 'permission',
+            data:{ _id:result._id, language:result.language._id, fullName:result.fullName, mobileNumber:result.mobileNumber,email:result.email,fcmToken:result.fcmToken, token:result.token}
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    return reject({ status: 500, message: 'Internal Server Error' });
+  }
+  })
+  .then((response) => {
+  const { status, data } = response;
+  return res.status(status).json(data);
+  })
+  .catch((error) => {
+  const { status, message } = error;
+  return res.status(status).json({ message });
+  });
   };
+
+// const CustmerLogin = async(req, res) => {
+//     return new Promise(async (resolve, reject) => {
+//       if (!req || !res || !req.body || !req.body.mobileNumber || !/^\d{10}$/.test(req.body.mobileNumber)) {
+//         return reject({ status: 400, message: 'Please provide a valid 10-digit mobile number.' });
+//       }
+  
+//       try {
+//         const { language, mobileNumber,fcmToken } = req.body;
+  
+//         const existingUser = await customerBasicDetailsModel.find({ mobileNumber }).exec();
+//         if (existingUser.length === 0) {
+//           const newUser = new customerBasicDetailsModel({
+//             mobileNumber: mobileNumber,
+//             language: language,
+//             fcmToken:fcmToken
+//             // email:"",
+//             // socialId:"",
+//             // socialMediaType:""
+//           });
+  
+//           await newUser.save();
+  
+//           return resolve({
+//             status: 200,
+//             data: {
+//               success: true,
+//               successCode :200,
+//               message: 'New User added successfully',
+//               nextScreen: 'registration',
+//               data: newUser,
+//             },
+//           });
+//         } else {
+//           const result = existingUser[0];
+//           if (result.fullName == '') {
+//             return resolve({
+//               status: 200,
+//               data: {
+//                 success: true,
+//                 successCode:200,
+//                 message:'This user verify its number already',
+//                 nextScreen: 'registration',
+//                 data:result
+//               },
+//             });
+//           } else {
+//             return resolve({
+//               status: 200,
+//               data: {
+//                 success: true,
+//                 successCode:200,
+//                 message: "User already Registred",
+//                 nextScreen: 'permission',
+//                 data: result,
+//               },
+//             });
+//           }
+//         }
+//       } catch (error) {
+//         console.error(error);
+//         return reject({ status: 500, message: 'Internal Server Error' });
+//       }
+//     })
+//       .then((response) => {
+//         const { status, data } = response;
+//         return res.status(status).json(data);
+//       })
+//       .catch((error) => {
+//         const { status, message } = error;
+//         return res.status(status).json({ message });
+//       });
+//   };
 
 // OTP Verification
 const otpVerification = async (req, res) => {
@@ -977,7 +1059,43 @@ const riderequest = async (req, res) => {
 //   }
 // };
 
+//customer Logout
+const customerLogout = (req, res) => {
+
+  const token = req.headers.authorization.split(' ')[1];
+
+  // Decode token to get Mobile Number 
+  const decodedToken = jwt.decode(token);
+  const _id = decodedToken.userId;
+
+  customerBasicDetailsModel.findOneAndUpdate(
+    { _id },
+    { $set: { token: null } },
+    { new: true }
+  )
+  .then((result) => {
+    if (!result) {
+      return Promise.reject({ status: 422, message: "Mobile number not found" });
+    }
+
+    return Promise.resolve({
+      message: "User logged out successfully",
+      data: { mobileNumber: result.mobileNumber },
+    });
+  })
+  .then((data) => {
+    return res.status(200).send(data);
+  })
+  .catch((error) => {
+    console.error(error);
+    if (error.status) {
+      return res.status(error.status).send({ message: error.message });
+    }
+    return res.status(500).send({ message: "Internal Server Error" });
+  });
+};
+
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer,riderequest
+    allNearestDrivers,showFareInCustomer,riderequest,customerLogout
 }
