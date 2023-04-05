@@ -60,7 +60,7 @@ router.post('/admin/getAllLabalCodes/:appScreens/:screenName',adminScreenCntroll
 router.post('/admin/getAllLabelCodesById/:screenName',adminScreenCntroller.getAllLabelCodesById);
 
 // Delete Label Codes 
-router.delete('/admin/deleteLabelCodes',adminScreenCntroller.deleteLabelCodes);
+router.delete('/admin/deleteLabelCodes/:_id',adminScreenCntroller.deleteLabelCodes);
 
 // Get All Screens By Language
 router.post('/admin/getAllScreensByLanguage',adminScreenCntroller.getAllScreensByLanguage);
