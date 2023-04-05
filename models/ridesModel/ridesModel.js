@@ -94,4 +94,5 @@ const customerRidesSchema = mongoose.Schema({
 customerRidesSchema.index({ pickupLocation: '2dsphere' });
 customerRidesSchema.index({ destinationLocation: '2dsphere' });
 
-module.exports = mongoose.model('ridesModel', customerRidesSchema);
+module.exports = mongoose.model('customerRidesModel',customerRidesSchema);
+

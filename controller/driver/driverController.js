@@ -866,7 +866,7 @@ const totalDrivers = (req, res) => {
 // update driver current location 
 const updateDriverCurrentLocation = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { _id } = req.params;
         const { latitude, longitude } = req.body;
 
         // Check if the latitude and longitude values are valid numbers
@@ -875,7 +875,7 @@ const updateDriverCurrentLocation = async (req, res) => {
         }
 
         // Find the driver by ID
-        const driver = await driverBasicDetailsMOdel.findById(id);
+        const driver = await driverBasicDetailsMOdel.findById({_id:_id});
 
         if (!driver) {
             return res.status(404).json({

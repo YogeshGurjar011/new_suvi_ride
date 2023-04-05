@@ -4,9 +4,15 @@ const twilio = require('twilio');
 const cfSdk = require('cashfree-sdk');
 const customerBasicDetailsModel = require('../../models/customerModel/customerModel/customerBasicDetailsModel')
 const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/driverModel');
+const customerRidesModel = require('../../models/ridesModel/ridesModel.js');
 const VehicleTypeWithFareModel = require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
 const geolib = require('geolib');
 const NodeGeocoder = require('node-geocoder');
+const FCM = require('fcm-node');
+const serverKey = 'AAAAjBZozHE:APA91bF2n5bBmQToPuoUowPFFWpfPx0PsJEwNjanwmiLR4YWVgSy3T6s9S7yKNQoQHNKUEXgOLE35BNrO2OfthgM02MlRDD6lpaCLJZceqCrW51TPxjFqRV4DEKVz6IJghCxqKl44hGP';
+const fcm = new FCM(serverKey);
+
+
 // Customer Genrate OTP 
 // const genrateotp = async (req, res) => {
 //     try {
@@ -196,78 +202,160 @@ const NodeGeocoder = require('node-geocoder');
 // }
 
 // Customer Login
-const CustmerLogin = async(req, res) => {
-    return new Promise(async (resolve, reject) => {
-      if (!req || !res || !req.body || !req.body.mobileNumber || !/^\d{10}$/.test(req.body.mobileNumber)) {
-        return reject({ status: 400, message: 'Please provide a valid 10-digit mobile number.' });
-      }
+
+const CustmerLogin = async (req, res) => {
+  return new Promise(async (resolve, reject) => {
+  if (!req || !res || !req.body || !req.body.mobileNumber || !/^\d{10}$/.test(req.body.mobileNumber)) {
+  return reject({ status: 400, message: 'Please provide a valid 10-digit mobile number.' });
+  }
+  try {
+    const { language, mobileNumber, fcmToken } = req.body;
   
-      try {
-        const { language, mobileNumber,fcmToken } = req.body;
-  
-        const existingUser = await customerBasicDetailsModel.find({ mobileNumber }).exec();
-        if (existingUser.length === 0) {
-          const newUser = new customerBasicDetailsModel({
-            mobileNumber: mobileNumber,
-            language: language,
-            fcmToken:fcmToken
-            // email:"",
-            // socialId:"",
-            // socialMediaType:""
-          });
-  
-          await newUser.save();
-  
-          return resolve({
-            status: 200,
-            data: {
-              success: true,
-              successCode :200,
-              message: 'New User added successfully',
-              nextScreen: 'registration',
-              data: newUser,
-            },
-          });
-        } else {
-          const result = existingUser[0];
-          if (result.fullName == '') {
-            return resolve({
-              status: 200,
-              data: {
-                success: true,
-                successCode:200,
-                message:'This user verify its number already',
-                nextScreen: 'registration',
-                data:result
-              },
-            });
-          } else {
-            return resolve({
-              status: 200,
-              data: {
-                success: true,
-                successCode:200,
-                message: "User already Registred",
-                nextScreen: 'permission',
-                data: result,
-              },
-            });
-          }
-        }
-      } catch (error) {
-        console.error(error);
-        return reject({ status: 500, message: 'Internal Server Error' });
-      }
-    })
-      .then((response) => {
-        const { status, data } = response;
-        return res.status(status).json(data);
-      })
-      .catch((error) => {
-        const { status, message } = error;
-        return res.status(status).json({ message });
+    const existingUser = await customerBasicDetailsModel.find({ mobileNumber })
+    .populate({ path: "language", select: ["name"] })
+    .exec();
+    console.log(existingUser)
+    if (existingUser.length === 0) {
+      const newUser = new customerBasicDetailsModel({
+        mobileNumber: mobileNumber,
+        language: language,
+        fcmToken: fcmToken
+        // email:"",
+        // socialId:"",
+        // socialMediaType:""
       });
+  
+      await newUser.save();
+  
+      return resolve({
+        status: 200,
+        data: {
+          success: true,
+          successCode: 200,
+          message: 'New User added successfully',
+          nextScreen: 'registration',
+          data: newUser,
+        },
+      });
+    } else {
+      const result = existingUser[0];
+      result.fcmToken = fcmToken;
+      await result.save();
+  
+      if (result.fullName == '') {
+        return resolve({
+          status: 200,
+          data: {
+            success: true,
+            successCode: 200,
+            message: 'This user verify its number already',
+            nextScreen: 'registration',
+            data:{ _id:result._id, language:result.language._id, fullName:result.fullName, mobileNumber:result.mobileNumber,email:result.email,fcmToken:result.fcmToken, token:result.token}
+          },
+        });
+      } else {
+        const token = jwt.sign({ userId: result._id, mobileNumber: result.mobileNumber,language: result.language.name, fullName: result.fullName, email: result.email  },  "theseissecretkey");
+        result.token = token;
+        await result.save();
+        return resolve({
+          status: 200,
+          data: {
+            success: true,
+            successCode: 200,
+            message: "User already Registred",
+            nextScreen: 'permission',
+            data:{ _id:result._id, language:result.language._id, fullName:result.fullName, mobileNumber:result.mobileNumber,email:result.email,fcmToken:result.fcmToken, token:result.token}
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    return reject({ status: 500, message: 'Internal Server Error' });
+  }
+  })
+  .then((response) => {
+  const { status, data } = response;
+  return res.status(status).json(data);
+  })
+  .catch((error) => {
+  const { status, message } = error;
+  return res.status(status).json({ message });
+  });
   };
+
+// const CustmerLogin = async(req, res) => {
+//     return new Promise(async (resolve, reject) => {
+//       if (!req || !res || !req.body || !req.body.mobileNumber || !/^\d{10}$/.test(req.body.mobileNumber)) {
+//         return reject({ status: 400, message: 'Please provide a valid 10-digit mobile number.' });
+//       }
+  
+//       try {
+//         const { language, mobileNumber,fcmToken } = req.body;
+  
+//         const existingUser = await customerBasicDetailsModel.find({ mobileNumber }).exec();
+//         if (existingUser.length === 0) {
+//           const newUser = new customerBasicDetailsModel({
+//             mobileNumber: mobileNumber,
+//             language: language,
+//             fcmToken:fcmToken
+//             // email:"",
+//             // socialId:"",
+//             // socialMediaType:""
+//           });
+  
+//           await newUser.save();
+  
+//           return resolve({
+//             status: 200,
+//             data: {
+//               success: true,
+//               successCode :200,
+//               message: 'New User added successfully',
+//               nextScreen: 'registration',
+//               data: newUser,
+//             },
+//           });
+//         } else {
+//           const result = existingUser[0];
+//           if (result.fullName == '') {
+//             return resolve({
+//               status: 200,
+//               data: {
+//                 success: true,
+//                 successCode:200,
+//                 message:'This user verify its number already',
+//                 nextScreen: 'registration',
+//                 data:result
+//               },
+//             });
+//           } else {
+//             return resolve({
+//               status: 200,
+//               data: {
+//                 success: true,
+//                 successCode:200,
+//                 message: "User already Registred",
+//                 nextScreen: 'permission',
+//                 data: result,
+//               },
+//             });
+//           }
+//         }
+//       } catch (error) {
+//         console.error(error);
+//         return reject({ status: 500, message: 'Internal Server Error' });
+//       }
+//     })
+//       .then((response) => {
+//         const { status, data } = response;
+//         return res.status(status).json(data);
+//       })
+//       .catch((error) => {
+//         const { status, message } = error;
+//         return res.status(status).json({ message });
+//       });
+//   };
 
 // OTP Verification
 const otpVerification = async (req, res) => {
@@ -583,8 +671,9 @@ const deleteCustomer = async(req,res)=>{
       res.status(200).send({
         success:true,
         successCode:200,
-        data:result,
-        message:'cutomer deleted successfully'
+        message:'customer delete successfully',
+        nextScreen: "loginScreen",
+        data:result
       })
     }
     else{
@@ -666,7 +755,7 @@ const allNearestDrivers = (req, res) => {
   const { pickupLocation } = req.body;
   // Query MongoDB for all drivers within a 10km radius of the pickup location
   driverBasicDetailsMOdel.find({
-    status: "available",
+    isAvailable: true,
     Status:"online",
     currentLocation: {
       $near: {
@@ -687,7 +776,7 @@ const allNearestDrivers = (req, res) => {
       );
       const distanceInKm = distance / 1000; // Convert meters to kilometers
       const duration = Math.round((distanceInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
-      return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] };
+      return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] ,vehicle:driver.vehicleType};
     });
     // Return the list of drivers sorted by distance
     const nearestDrivers = driverDistances.sort((a, b) => a.distance - b.distance);
@@ -775,6 +864,151 @@ const showFareInCustomer = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
+
+// riderequest by customer
+
+const riderequest = async (req, res) => {
+  try {
+    const { customerId, pickuplocation, dropofflocation, vehicleType } = req.body;
+
+    // Find the vehicle type with the fare rate for the selected vehicle type
+    const vehicleTypeWithFare = await VehicleTypeWithFareModel.findOne({ name: vehicleType });
+    // console.log(vehicleTypeWithFare)
+    if (!vehicleTypeWithFare) {
+      return res.status(400).json({ message: "Invalid vehicle type selected." });
+    }
+    const distanceToDropoff = geolib.getDistance(
+      { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+      { latitude: dropofflocation.latitude, longitude: dropofflocation.longitude }
+    );
+    const distanceInKm = distanceToDropoff / 1000;
+    const farerate = vehicleTypeWithFare?.perKmCharge
+    const fare = Math.round(vehicleTypeWithFare?.baseFare + (distanceInKm * farerate));
+
+    // Find the nearest drivers within a 10 km radius of the pickup location
+    const drivers = await driverBasicDetailsMOdel.find({
+      Status: "online",
+      currentLocation: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [pickuplocation.longitude, pickuplocation.latitude],
+          },
+          $maxDistance: 5000, // 10km in meters
+        },
+      },
+    });
+    console.log(drivers)
+    if (drivers.length === 0) {
+      return res.status(404).json({ message: "No drivers found in the area." });
+    }
+
+    // Calculate the distance and time duration to each driver using geolib
+    const distanceToDriver = drivers.map((driver) => {
+      const distance = geolib.getDistance(
+        { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+        { latitude: driver.currentLocation.coordinates[1], longitude: driver.currentLocation.coordinates[0] }
+      );
+      const distanceToDriverInKm = distance / 1000; // Convert meters to kilometers
+      const durationToDriver = Math.round((distanceToDriverInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
+      return { driverId: driver._id, distance: distanceToDriverInKm.toFixed(2), durationToDriver, isAvailable: driver.isAvailable, deviceToken: driver.deviceToken };
+    });
+
+    // Return the list of drivers sorted by distance
+    const nearestDrivers = distanceToDriver.sort((a, b) => a.distance - b.distance);
+
+    // Save the ride request to the database
+    const scheduledTime = new Date();
+    scheduledTime.setHours(10);
+    scheduledTime.setMinutes(30);
+    scheduledTime.setSeconds(0);
+    // console.log(scheduledTime.getTime())
+    // console.log( nearestDrivers)
+    // console.log( nearestDrivers[0].driverId)
+    const ride = new customerRidesModel({
+      customerId,
+      driverId: null,
+      pickupLocation: pickuplocation.address,
+      pickupLatitude: pickuplocation.latitude,
+      pickupLongitude: pickuplocation.longitude,
+      destinationLocation: dropofflocation.address,
+      destinationLatitude: dropofflocation.latitude,
+      destinationLongitude: dropofflocation.longitude,
+      vehicleType: vehicleType,
+      numberOfPassengers: "3",
+      scheduled: true,
+      scheduledDate: Date.now(),
+      bookedFor: "",
+      fare,
+      distance: distanceInKm,
+      duration: Math.round((distanceInKm / 30) * 60), // Assuming average speed of 30 km/hr, convert km to minutes
+    });
+    const savedRide = await ride.save();
+    const customer = await customerBasicDetailsModel.findById({ _id: savedRide.customerId })
+      .populate({ path: 'fullName', select: ['customerId'] })
+    console.log(customer)
+
+    // Send the ride request to all nearest drivers
+    const messageBody = {
+      ride_id: savedRide._id,
+      customerName: customer.fullName,
+      savedRide,
+    };
+    console.log(messageBody);
+    
+    const responses = [];
+    let rideData = {
+      ride_id: savedRide._id,
+      customer_id: customer._id,
+      pickupLocation: savedRide.pickupLocation,
+      pickupLatitude: savedRide.pickupLatitude,
+      pickupLongitude: savedRide.pickupLongitude,
+      destinationLocation: savedRide.destinationLocation,
+      destinationLatitude: savedRide.destinationLatitude,
+      destinationLongitude: savedRide.destinationLongitude,
+      fare,
+      numberOfPassengers:savedRide.numberOfPassengers,
+      status:savedRide.status,
+    };
+    
+    for (let i = 0; i < nearestDrivers.length; i++) {
+      const message = {
+        to: 'eWdC1g0hSvK4j43NKVObG1:APA91bFqGeOSgkNIhbEjjRt2CvH1APUJKk9iY02KsS4ace5WVgf-ze1D4E6qARgV_PIJonoandmhi4_NDNc13kmFJJB6WVh9BkTJvMjlF1TJ-1BuXR-Z3x9bPL49yZZd76F8voGaW7qu',
+        notification: {
+          title: 'test',
+          body: `new ride request by ${customer.fullName}`,
+          data:rideData,
+          delivery_receipt_requested: true,
+        },
+      };
+    
+      fcm.send(message, function (err, resp) {
+        if (err) {
+          console.log('Error sending message:', err);
+          responses.push({
+            message: 'Error sending message:',
+            err,
+          });
+        } else {
+          console.log('Successfully sent message:', resp);
+          responses.push({
+            message: 'Successfully sent message:',
+            resp,
+          });
+        }
+        if (responses.length === nearestDrivers.length) {
+          res.status(200).json({
+            message: 'Ride request sent to nearest drivers.',
+            ride: rideData,
+          });
+        }
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Server error.', error });
+  }
+};
 // const showFareInCustomer = async (req, res) => {
 //   try {
 //     const { pickuplocation, dropofflocation } = req.body;
@@ -826,7 +1060,84 @@ const showFareInCustomer = async (req, res) => {
 //   }
 // };
 
+// all rides by customer
+const allRidesByCustomer = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+
+    // Decode token to get Mobile Number 
+    const decodedToken = jwt.decode(token);
+    const customerId = decodedToken.userId;
+
+    await customerRidesModel.find({ customerId: customerId })
+      .exec((err, resp) => {
+        if (err) {
+          res.status(422).send({
+            message: err.message,
+            error: err
+          })
+        }
+        else {
+          if (resp) {
+            res.status(200).send({
+              message: "All Rides By Customer",
+              count: resp.length,
+              data: resp
+            })
+          }
+          else {
+            res.status(200).send({
+              message: "Not Found Any Rides"
+            })
+          }
+        }
+      })
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+//customer Logout
+const customerLogout = (req, res) => {
+
+  const token = req.headers.authorization.split(' ')[1];
+
+  // Decode token to get Mobile Number 
+  const decodedToken = jwt.decode(token);
+  const _id = decodedToken.userId;
+
+  customerBasicDetailsModel.findOneAndUpdate(
+    { _id },
+    { $set: { token: null } },
+    { new: true }
+  )
+  .then((result) => {
+    if (!result) {
+      return Promise.reject({ status: 422, message: "Mobile number not found" });
+    }
+
+    return Promise.resolve({
+      message: "User logged out successfully",
+      nextScreen: "loginScreeen",
+      data: { mobileNumber: result.mobileNumber },
+    });
+  })
+  .then((data) => {
+    return res.status(200).send(data);
+  })
+  .catch((error) => {
+    console.error(error);
+    if (error.status) {
+      return res.status(error.status).send({ message: error.message });
+    }
+    return res.status(500).send({ message: "Internal Server Error" });
+  });
+};
+
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer
+    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout
 }

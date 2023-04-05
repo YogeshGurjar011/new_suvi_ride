@@ -29,6 +29,12 @@ router.post('/customer/allNearestDrivers',customerController.allNearestDrivers);
 
 router.post('/customer/showFareInCustomer',customerController.showFareInCustomer);
 
+router.post('/customer/riderequest',customerController.riderequest);
+
+router.get('/customer/allRidesByCustomer',customerValidation,customerController.allRidesByCustomer);
+
+router.post('/customer/customerLogout',customerValidation,customerController.customerLogout)
+
 //router.post('/payment',customerController.paymentGetway);
 
 module.exports = router;
