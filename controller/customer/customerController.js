@@ -6,6 +6,7 @@ const customerBasicDetailsModel = require('../../models/customerModel/customerMo
 const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/driverModel');
 const customerRidesModel = require('../../models/ridesModel/ridesModel.js');
 const VehicleTypeWithFareModel = require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
+const ratingModel = require('../../models/rattingModel');
 const geolib = require('geolib');
 const NodeGeocoder = require('node-geocoder');
 const FCM = require('fcm-node');
@@ -1137,7 +1138,90 @@ const customerLogout = (req, res) => {
   });
 };
 
+// customer to driver rating
+const customerrRatting = async (req, res) => {
+  try {
+    const { rideId, customerId, customerRating } = req.body;
+    
+    // Find the ride associated with the given ride ID
+    const foundRide = await customerRidesModel.findById(rideId);
+    
+    // If the ride is not found, return 404 error
+    if (!foundRide) {
+      return res.status(404).send({
+        success: false,
+        message: "Ride not found"
+      });
+    }
+    // If the ride is not completed yet, return 400 error
+    else if (foundRide.status !== "Completed") {
+      return res.status(400).send({
+        success: false,
+        message: "This ride has not been completed yet"
+      });
+    }
+    // If the customer ID does not match the ID of the customer assigned to the ride, return 400 error
+    else if (foundRide.customerId.toString() !== customerId) {
+      return res.status(400).send({
+        success: false,
+        message: "This customer was not assigned to this driver"
+      });
+    }
+    // If everything checks out, update the rating information in the database
+    else {
+      const ratingDetails = await ratingModel.findOne({ rideId: rideId });
+      
+      // If a rating for this ride does not exist, create a new rating object and save it to the database
+      if (!ratingDetails) {
+        const rating = new ratingModel({
+          customerId: foundRide.customerId,
+          driverId: foundRide.driverId,
+          ride: rideId,
+          customerRating: customerRating,
+          driverRating: null
+        });
+        const ratingResult = await rating.save();
+        
+        // If the rating is successfully saved to the database, return a success message
+        if (ratingResult) {
+          res.status(200).send({
+            success: true,
+            message: "Rating submitted successfully"
+          });
+        } 
+        // If the rating fails to save to the database, return an error message
+        else {
+          res.status(400).send({
+            success: false,
+            message: "Rating not submitted"
+          });
+        }
+      } 
+      // If a rating for this ride already exists, update the existing rating object in the database
+      else {
+        const updatedRating = await ratingModel.findOneAndUpdate(
+          { _id: ratingDetails._id },
+          { $set: { customerId: customerId, customerRating: customerRating } },
+          { new: true }
+        );
+        res.status(200).send({
+          message: "Thank you for submitting your feedback",
+          updatedRating
+        });
+      }
+    }
+  } 
+  // If there is an error with the request, return a 500 error message
+  catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout
+    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting
 }
