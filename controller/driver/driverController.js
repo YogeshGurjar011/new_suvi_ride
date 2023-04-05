@@ -2,7 +2,7 @@ const { required } = require('joi');
 const jwt = require('jsonwebtoken');
 const twilio = require('twilio');
 const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/driverModel');
-
+const rideModel = require('../../models/ridesModel/ridesModel');
 // Genrate OTP 
 // const driverAppGenrateotp = async (req, res) => {
 //     try {
@@ -1024,6 +1024,58 @@ const updatePersonalDetails = async (req, res) => {
     }
 }
 
+// Ratting 
+const driverRatting = async (req, res) => {
+    try {
+        const { rideId, driverId, driverRating } = req.body;
+        const findRide = await rideModel.findById(rideId);
+        if (!findRide) {
+            return res.status(404).send({
+                success: false,
+                message: "Ride not found"
+            });
+        }
+        // Check if the ride was completed
+        if (findRide.status !== "Completed") {
+            return res.status(400).send({
+                success: false,
+                message: "This ride has not been completed yet"
+            });
+        }
+        // Check if the driver was assigned to this ride
+        if (findRide.driverId.toString() !== driverId) {
+            return res.status(400).send({
+                success: false,
+                message: "This driver was not assigned to this ride"
+            });
+        }
+        const rate = new rattingModel({
+            customerId: findRide.customerId,
+            driverId: driverId,
+            ride: rideId,
+            customerRating: null,
+            driverRating: driverRating
+        });
+        const rattingResult = await rate.save();
+        if (rattingResult) {
+            res.status(200).send({
+                success: true,
+                message: "Rating submitted successfully"
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                message: "Rating not submitted"
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
 // Logout Driver
 const driverLogout = async (req, res) => {
     try {
@@ -1179,5 +1231,5 @@ module.exports = {
     driverDrivingLicence, driverVehicleDetails, driverAddBankDetails, driverTakeSelfie,
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
-    driverLoginWithSocial
+    driverRatting,driverLoginWithSocial
 }

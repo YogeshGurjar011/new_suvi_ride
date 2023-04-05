@@ -50,6 +50,8 @@ router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
 
 router.patch('/driver/updatePersonalDetails',driverValidation,upload.single('profilePhoto'),driverController.updatePersonalDetails);
 
+router.post('/driver/driverRatting',driverController.driverRatting);
+
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
 
 router.post('/driver/driverLoginWithSocial',driverController.driverLoginWithSocial);
