@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const twilio = require('twilio');
 const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/driverModel');
 const rideModel = require('../../models/ridesModel/ridesModel');
+const rattingModel = require('../../models/rattingModel');
 // Genrate OTP 
 // const driverAppGenrateotp = async (req, res) => {
 //     try {
@@ -745,7 +746,7 @@ const checkDriverDocumentsVerificationByAdmin = async (req, res) => {
             });
         }
 
-        const result = await driverModel.findOneAndUpdate(
+        const result = await driverBasicDetailsMOdel.findOneAndUpdate(
             { _id: req.params._id },
             {
                 $set: {
