@@ -939,11 +939,11 @@ const deleteVehicalType = async(req,res)=>{
 //           ride_id: ride._id,
 //           rider_name: ride.customerId.fullName,
 //           driver_name: ride.driverId.drivingLicence.fullName,
-//           pickup_address: `<span style="height: 20px; width: 20px; background-color: green; border-radius: 50%; display: inline-block;"></span> ${ride.pickupLocation}`,
-//           dropoff_address: `<span style="height: 20px; width: 20px; background-color: red; border-radius: 50%; display: inline-block;"></span> ${ride.destinationLocation}`,
+//           pickup_address: `<span style="height: 10px; width: 10px; background-color: green; border-radius: 50%; display: inline-block;"></span> ${ride.pickupLocation}`,
+//           dropoff_address: `<span style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block;"></span> ${ride.destinationLocation}`,
 //           ride_fare: ride.fare,
 //            date:ride.scheduledDate,
-//           status: `<button style="background-color: ${statusColor};  border-radius:4px ; color:#FFFFFF; fontFamily: Roboto; fontStyle: normal; fontWeight: 500; fontSize: 12px; lineHeight: 14px; width: 100px; height: 30px;">${ride.status}</button>`
+//           status: `<button style="background-color: ${statusColor};  border-radius:6px ; color:#FFFFFF; fontFamily: Roboto; fontStyle: normal; fontWeight: 500; fontSize: 12px; lineHeight: 14px; width: 100px; height: 30px;">${ride.status}</button>`
 //         };
 //       });
   
