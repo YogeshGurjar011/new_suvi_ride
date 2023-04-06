@@ -902,6 +902,66 @@ const deleteVehicalType = async(req,res)=>{
 }
 
 // admin get all rides in dashboard
+// const adminGetAllRides = async (req, res) => {
+//     try {
+//       const rides = await customerRidesModel.find({})
+//         .populate({ path: 'customerId', select: 'fullName' })
+//         .populate({ path: 'driverId', select: 'drivingLicence.fullName' })
+//         .exec();
+  
+//       if (rides.length === 0) {
+//         return res.status(404).json({
+//           message: 'No rides available',
+//         });
+//       }
+  
+//       const rideDetails = rides.map((ride) => {
+//         let statusColor;
+//         switch (ride.status) {
+//           case 'completed':
+//             statusColor = 'green';
+//             break;
+//           case 'cancelled':
+//             statusColor = 'red';
+//             break;
+//           case 'in_progress':
+//             statusColor = 'blue';
+//             break;
+//           case 'ongoing':
+//             statusColor = 'yellow';
+//             break;
+//           default:
+//             statusColor = 'gray';
+//             break;
+//         }
+        
+//         return {
+//           ride_id: ride._id,
+//           rider_name: ride.customerId.fullName,
+//           driver_name: ride.driverId.drivingLicence.fullName,
+//           pickup_address: `<span style="height: 10px; width: 10px; background-color: green; border-radius: 50%; display: inline-block;"></span> ${ride.pickupLocation}`,
+//           dropoff_address: `<span style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block;"></span> ${ride.destinationLocation}`,
+//           ride_fare: ride.fare,
+//            date:ride.scheduledDate,
+//           status: `<button style="background-color: ${statusColor};  border-radius:6px ; color:#FFFFFF; fontFamily: Roboto; fontStyle: normal; fontWeight: 500; fontSize: 12px; lineHeight: 14px; width: 100px; height: 30px;">${ride.status}</button>`
+//         };
+//       });
+  
+//       return res.status(200).json({
+//         message: 'All Rides',
+//         data: rideDetails,
+//       });
+//     } catch (error) {
+//       console.error(error);
+//       return res.status(500).json({
+//         success: false,
+//         successCode: 500,
+//         message: 'Internal Server Error',
+//         error: error.message,
+//       });
+//     }
+//   };
+
 const adminGetAllRides = async (req, res) => {
     try {
       const rides = await customerRidesModel.find({})
@@ -934,16 +994,19 @@ const adminGetAllRides = async (req, res) => {
             statusColor = 'gray';
             break;
         }
-        
+  
+        const riderName = ride.customerId ? ride.customerId.fullName : 'Unknown';
+        const driverName = ride.driverId ? ride.driverId.drivingLicence.fullName : 'Unknown';
+  
         return {
           ride_id: ride._id,
-          rider_name: ride.customerId.fullName,
-          driver_name: ride.driverId.drivingLicence.fullName,
-          pickup_address: `<span style="height: 20px; width: 20px; background-color: green; border-radius: 50%; display: inline-block;"></span> ${ride.pickupLocation}`,
-          dropoff_address: `<span style="height: 20px; width: 20px; background-color: red; border-radius: 50%; display: inline-block;"></span> ${ride.destinationLocation}`,
+          rider_name: riderName,
+          driver_name: driverName,
+          pickup_address: `<span style="height: 10px; width: 10px; background-color: green; border-radius: 50%; display: inline-block;"></span> ${ride.pickupLocation}`,
+          dropoff_address: `<span style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block;"></span> ${ride.destinationLocation}`,
           ride_fare: ride.fare,
-           date:ride.scheduledDate,
-          status: `<button style="background-color: ${statusColor};  border-radius:4px ; color:#FFFFFF; fontFamily: Roboto; fontStyle: normal; fontWeight: 500; fontSize: 12px; lineHeight: 14px; width: 100px; height: 30px;">${ride.status}</button>`
+          date: ride.scheduledDate,
+          status: `<button style="background-color: ${statusColor};  border-radius:6px ; color:#FFFFFF; fontFamily: Roboto; fontStyle: normal; fontWeight: 500; fontSize: 12px; lineHeight: 14px; width: 100px; height: 30px;">${ride.status}</button>`
         };
       });
   

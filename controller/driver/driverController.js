@@ -894,7 +894,7 @@ const updateDriverCurrentLocation = async (req, res) => {
             });
         }
 
-        if (driver.status !== 'online') {
+        if (driver.Status !== 'online') {
             return res.status(400).json({
                 success: false,
                 successCode: 400,

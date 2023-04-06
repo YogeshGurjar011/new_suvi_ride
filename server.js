@@ -28,7 +28,7 @@ let options = {
 };
 
 let corOption ={
-    origin:['http://localhost:3000','http://localhost:5000','http://localhost:7000'],
+    origin:['http://localhost:3000','http://localhost:5000','http://localhost:7000' , 'http://localhost:8000'],
     methods:["GET","POST","PUT","DELETE","PATCH"],
   }
 
