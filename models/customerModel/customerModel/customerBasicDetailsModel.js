@@ -38,7 +38,11 @@ const customerSchema = new mongoose.Schema({
             type:mongoose.Schema.Types.ObjectId,
             ref:'customerRidesModel'
         }
-    ]
+    ],
+    profileImage:{
+        type:String,
+        default:""
+    }
     // socialId:{
     //     type:String,
     //     trim:true,

@@ -50,10 +50,26 @@ router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
 
 router.patch('/driver/updatePersonalDetails',driverValidation,upload.single('profilePhoto'),driverController.updatePersonalDetails);
 
+router.post('/driver/acceptRideRequest',driverController.acceptRideRequest);
+
+router.post('/driver/declineRideRequest',driverController.declineRideRequest);
+
+router.post('/driver/navigateToPickupPoint',driverController.navigateToPickupPoint);
+
+router.post('/driver/startRide/:_id',driverController.startRide);
+
+router.post('/driver/reachedToDestination',driverController.reachedToDestination);
+
+router.post('/driver/completeRide/:_id',driverController.endRide);
+
 router.post('/driver/driverRatting',driverController.driverRatting);
+
+router.post('/driver/getAllRides',driverController.getAllRides);
+
+router.post('/driver/writeToUs',driverController.writeToUs);
 
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
 
-router.post('/driver/driverLoginWithSocial',driverController.driverLoginWithSocial);
+
 
 module.exports = router;

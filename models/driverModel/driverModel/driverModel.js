@@ -1,136 +1,140 @@
 const mongoose = require('mongoose');
 const driverSchema = new mongoose.Schema({
-    language:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'languagesModel',
-        required:true   
+    language: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'languagesModel',
+        required: true
     },
-    mobileNumber:{
-        type:Number,
-        required:true,
-        validate:{
-            validator:function(v){
+    mobileNumber: {
+        type: Number,
+        required: true,
+        validate: {
+            validator: function (v) {
                 return /^\d{10,12}$/.test(v)
             },
-            message:'please enter valid mobile number'
+            message: 'please enter valid mobile number'
         }
     },
-    otp:{
-        type:Number
+    otp: {
+        type: Number
     },
-    deviceToken:{
-      type:String,
-      default:""
+    profilePhoto: {
+        type: String,
+        default: ""
     },
-    drivingLicence:{
-        fullName:{
-            type:String,
-            trime:true,
-            lowercase:true,
-            default:""
+    deviceToken: {
+        type: String,
+        default: ""
+    },
+    drivingLicence: {
+        fullName: {
+            type: String,
+            trime: true,
+            lowercase: true,
+            default: ""
 
         },
-        address:{
-            type:String,
-            trime:true,
-            lowercase:true,
-            default:""
+        address: {
+            type: String,
+            trime: true,
+            lowercase: true,
+            default: ""
         },
-        gender:{
-            type:String,
-            enum:{
-                values:['male','female','other'],
-                message:'something went wrong',
-                default:'male'
+        gender: {
+            type: String,
+            enum: {
+                values: ['male', 'female', 'other'],
+                message: 'something went wrong',
+                default: 'male'
             },
         },
-        licenceNumber:{
-            type:String,
-            trime:true,
-            default:""
+        licenceNumber: {
+            type: String,
+            trime: true,
+            default: ""
         },
-        issuedDate:{
+        issuedDate: {
             // type:Date,
             // default:Date.now
-            type:String
+            type: String
         },
-        validitiy:{
-           // type:Date,
+        validitiy: {
+            // type:Date,
             // default:Date.now
-            type:String
+            type: String
         },
-        uploadImage:{
-            type:String,
-            default:""
+        uploadImage: {
+            type: String,
+            default: ""
 
         },
-        verification:{
-            type:String,
-            default:"failed"
+        verification: {
+            type: String,
+            default: "failed"
         }
     },
-    vehiclesDetails:{
-        vehicleModelNumber:{
-            type:String,
-            default:""
+    vehiclesDetails: {
+        vehicleModelNumber: {
+            type: String,
+            default: ""
         },
-        registrationID:{
-            type:String,
-            default:""
+        registrationID: {
+            type: String,
+            default: ""
         },
-        dateofRegistration:{
-            type:Date,
-            default:Date.now
+        dateofRegistration: {
+            type: Date,
+            default: Date.now
         },
-        registrationValidity:{
-            type:Date,
-            default:Date.now
+        registrationValidity: {
+            type: Date,
+            default: Date.now
         },
-        imageOfRegistrationCard:{
-            type:String,
-            default:""
+        imageOfRegistrationCard: {
+            type: String,
+            default: ""
         },
-        verification:{
-            type:String,
-            default:'failed'
+        verification: {
+            type: String,
+            default: 'failed'
         }
     },
-    bankDetails:{
-        accountNumber:{
-            type:Number,
-            default:"123455"
+    bankDetails: {
+        accountNumber: {
+            type: Number,
+            default: "123455"
         },
-        IFSC:{
-            type:String,
-            default:"12345"
+        IFSC: {
+            type: String,
+            default: "12345"
         },
-        verification:{
-            type:String,
-            default:'failed'
+        verification: {
+            type: String,
+            default: 'failed'
         }
     },
-    selfie:{
-        type:String,
-        default:""
+    selfie: {
+        type: String,
+        default: ""
     },
-    verificationStatus:{
-        type:String,
-        default:'failed' 
+    verificationStatus: {
+        type: String,
+        default: 'failed'
     },
     vehicleType: {
         type: String,
         enum: ['car', 'bike', 'auto'],
-        default:"auto"
+        default: "auto"
     },
     currentLocation: {
         type: {
             type: String,
             enum: ['Point'],
-          },
-          coordinates: {
-              type: [Number],
-              default: []
-          }
+        },
+        coordinates: {
+            type: [Number],
+            default: []
+        }
     },
     lastLocationUpdate: {
         type: Date,
@@ -144,7 +148,7 @@ const driverSchema = new mongoose.Schema({
     currentRide: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'customerRidesModel'
-    }, 
+    },
     passengerCapacity: {
         type: Number,
         default: 4
@@ -152,29 +156,28 @@ const driverSchema = new mongoose.Schema({
     lastUpdated: {
         type: Date
     },
-    Status:{
-        type:String,
-        enum:['online','offline'],
+    Status: {
+        type: String,
+        enum: ['online', 'offline'],
         default: 'offline'
     },
     isAvailable: {
         type: Boolean,
         default: true,
-      },
-    //   fcmToken:{
-    //    type:String,
-    //    default:""
-    // }
+    },
+    complaints: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'writeToUsModel'
+    }],
 })
 
-driverSchema.index({currentLocation: '2dsphere'})
-module.exports = mongoose.model('driverBasicDetailsMOdel',driverSchema);
+driverSchema.index({ currentLocation: '2dsphere' })
+module.exports = mongoose.model('driverBasicDetailsMOdel', driverSchema);
 
 
-  
-       
-     
-      
-       
-   
-   
+
+
+
+
+
+

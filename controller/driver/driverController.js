@@ -1,9 +1,18 @@
 const { required } = require('joi');
 const jwt = require('jsonwebtoken');
 const twilio = require('twilio');
+const admin = require('firebase-admin');
+const moment = require('moment-timezone');
 const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/driverModel');
 const rideModel = require('../../models/ridesModel/ridesModel');
 const rattingModel = require('../../models/rattingModel');
+const writeToUsModel = require('../../models/writeToUsModel');
+const serviceAccount = require('../../middeleware_functions/suviridecustomer-firebase-adminsdk-77pfg-a098f6abae.json');
+
+//Initialize the Firebase admin SDK
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 // Genrate OTP 
 // const driverAppGenrateotp = async (req, res) => {
 //     try {
@@ -827,7 +836,6 @@ const totalDrivers = (req, res) => {
         if (!req || !res) {
             return reject({ success: false, successCode: 400, message: 'Bad Request' });
         }
-
         try {
             driverBasicDetailsMOdel
                 .find({})
@@ -1025,10 +1033,304 @@ const updatePersonalDetails = async (req, res) => {
     }
 }
 
-// Ratting 
+
+//Accept Ride Request 
+const acceptRideRequest = async (req, res) => {
+    // Get token from header (Authorization)
+    const token = req.headers.authorization.split(' ')[1]
+    // Decode token to get Driver Id
+    const decodeToken = jwt.decode(token)
+    const driverId = decodeToken.driverId
+    const deviceToken = req.body.deviceToken;
+    const ride_id = req.body.ride_id
+    //const driverId = req.body.driverId
+    const findRideStatus = await rideModel.findOne({ _id: ride_id });
+    console.log(findRideStatus);
+    if (findRideStatus && findRideStatus.status == "requested") {
+        console.log('hello')
+        const filter = { _id: ride_id }
+        const update = { status: "Accepted", driverId: driverId }
+        const options = { new: true }
+        const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
+        if (rideAccepted) {
+            const driverFilter = { _id: driverId }
+            const driverUpdate = { hasRide: true }
+            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+            const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
+                .populate({ path: 'vehicleType', select: ['name'] })
+                .populate({ path: 'currentRide', select: ['driverId'] });
+            if (findDriver) {
+                // const fullName = findDriver[0].drivingLicence.fullName;
+                // const profileImage = findDriver[0].selfie;
+                // const rating = findDriver[0].ratting;
+                // const vehicleType = findDriver[0].vehicleType;
+                const deviceTokens = [deviceToken];
+                const message = {
+                    notification: {
+                        title: 'New Message',
+                        body: 'ride requested accpeted',
+                    },
+                    data: {
+                        //     fullName: fullName,
+                        //     profileImage: profileImage,
+                        //     rating: rating.toString(),
+                        //    // vehicleType: vehicleType
+
+                    }
+                };
+                try {
+                    const response = await admin.messaging().sendToDevice(deviceTokens, message);
+                    console.log('Successfully sent message:', response);
+                    res.status(200).send({
+                        success: true,
+                        //data:findDriver,
+                        fullName: findDriver.drivingLicence.fullName,
+                        selfie: findDriver.selfie,
+                        ratting: findDriver.ratting,
+                        registrationID: findDriver.vehiclesDetails.registrationID,
+                        pickupLocation: findRideStatus.pickupLocation,
+                        destinationLocation: findRideStatus.destinationLocation,
+                        paymentMethod: findRideStatus.paymentMethod,
+                        message: "Ride accepted successfully",
+                        nextScreen: 'Navigate to pickup point Screen'
+                    });
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    res.status(500).send({
+                        success: false,
+                        message: "Error sending push notification"
+                    });
+                }
+            }
+        }
+    } else if (findRideStatus && findRideStatus.status == "Accepted") {
+        res.status(200).send({
+            success: false,
+            message: "This ride has been accepted by another driver. Please wait for a new ride.",
+            nextScreen: 'Home Screen'
+        });
+    }
+    else {
+        res.status(404).send({
+            success: false,
+            message: "Ride not found"
+        });
+    }
+}
+
+
+// Decline Ride Request
+const declineRideRequest = async (req, res) => {
+    // Get token from header (Authorization)
+    const token = req.headers.authorization.split(' ')[1]
+    // Decode token to get Driver Id
+    const decodeToken = jwt.decode(token)
+    const driverId = decodeToken.driverId
+    const ride_id = req.body.ride_id
+    // const driverId = req.body.driverId
+    const findRideStatus = await rideModel.findOne({ _id: ride_id });
+    console.log(findRideStatus);
+    if (findRideStatus && findRideStatus.status == "requested") {
+        const filter = { _id: ride_id }
+        const update = { status: "Declined", driverId: driverId }
+        const options = { new: true }
+        const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
+        if (rideDeclined) {
+            const driverFilter = { _id: driverId }
+            const driverUpdate = { hasRide: false }
+            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+            res.status(200).send({
+                success: true,
+                message: 'Ride request declined',
+                nextScreen: 'Home screen'
+            })
+        } else {
+            res.status(400).send({
+                success: false,
+                message: 'Ride not found'
+            })
+        }
+    } else {
+        res.status(400).send({
+            success: false,
+            message: 'Invalid ride status'
+        })
+    }
+}
+
+// Navigate to pickup location
+const navigateToPickupPoint = async (req, res) => {
+    try {
+        const pickupLatitude = req.body.pickupLatitude; // [37.7749, -122.4194]; // example pickup location
+        const pickupLongitude = req.body.pickupLongitude;
+        const currentLocation = req.body.currentLocation; // [37.7739, -122.4312]; // example driver location
+        const distanceThreshold = 100; // threshold distance in meters
+        const averageDrivingSpeed = 30; // average driving speed in km/h
+
+        // Calculate the distance and time to reach the pickup location
+        const distance = req.body.distance; // distance from request body
+        const distanceInKm = distance / 1000; // convert distance to kilometers
+        const timeInMinutes = distanceInKm / (averageDrivingSpeed / 60); // time in minutes
+
+        // Check whether the driver has reached the pickup location
+        if (distanceInKm <= distanceThreshold / 1000) {
+            res.status(200).send({
+                success: true,
+                message: "You have reached the pickup location!",
+                nextScreen: "Enter OTP"
+            });
+        } else {
+            res.status(200).send({
+                success: true,
+                message: `You are still ${Math.ceil(timeInMinutes)} minute(s) away from the pickup location.`
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
+
+// start ride 
+const startRide = async (req, res) => {
+    try {
+        const _id = req.params._id;
+        const ride = await rideModel.findById(_id);
+        if (!ride) {
+            return res.status(404).json({ success: false, message: 'Ride not found' });
+        }
+        if (ride.status !== 'Accepted') {
+            return res.status(400).json({ success: false, message: 'Cannot start ride in current status' });
+        }
+        ride.status = 'Ongoing';
+        ride.rideStartTime = Date.now(); // optional: update start time
+        await ride.save();
+
+        // Convert UTC date to local timezone and format it
+        const localDate = moment.utc(ride.rideStartTime).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+        return res.json({ success: true, message: 'Ride started successfully', nextScreen: 'Reached to Destination Screen' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+// Reach To Destination
+const reachedToDestination = async (req, res) => {
+    try {
+        const destinationLatitude = req.body.destinationLatitude; // [37.7749, -122.4194]; // example destination location!
+        const destinationLongitude = req.body.destinationLongitude
+        const currentLocation = req.body.currentLocation; // [37.7739, -122.4312]; // example driver location
+        const distanceThreshold = 100; // threshold distance in meters
+        const averageDrivingSpeed = 30; // average driving speed in km/h
+
+        // Calculate the distance and time to reach the destination location!
+        const distance = req.body.distance; // distance from request body
+        const distanceInKm = distance / 1000; // convert distance to kilometers
+        const timeInMinutes = distanceInKm / (averageDrivingSpeed / 60); // time in minutes
+
+        // Check whether the driver has reached thedestination location!
+        if (distanceInKm <= distanceThreshold / 1000) {
+            res.status(200).send({
+                success: true,
+                message: "You have reached the destination location!",
+                nextScreen: "Make Payment Screen"
+            });
+        } else {
+            res.status(200).send({
+                success: true,
+                message: `You are still ${Math.ceil(timeInMinutes)} minute(s) away from the destination location!.`
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
+
+const endRide = async (req, res) => {
+    try {
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1]
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+        // const driverId = req.body.driverId
+        const _id = req.params._id;
+        const findRide = await rideModel.findById(_id);
+        if (!findRide) {
+            return res.status(404).send({
+                success: false,
+                message: "Ride not found"
+            });
+        }
+        // Check if the ride was ongoing
+        if (findRide.status !== "Ongoing") {
+            return res.status(400).send({
+                success: false,
+                message: "This ride is not ongoing"
+            });
+        }
+        // Check if the payment was made
+        if (findRide.paymentStatus !== "Paid") {
+            return res.status(400).send({
+                success: false,
+                message: "Payment for this ride is still pending"
+            });
+        }
+        // calculating distance between pickup and destination location using geolib library of javascript
+        const pickupLocationLatLong = { latitude: findRide.pickupLatitude, longitude: findRide.pickupLongitude };
+        const destinationLocationLatLOng = { latitude: findRide.destinationLatitude, longitude: findRide.destinationLongitude };
+        // Calculate the fare for the ride
+        const distanceTraveled = calculateDistance(pickupLocationLatLong, destinationLocationLatLOng);
+        const baseFare = 10; // Set your base fare here
+        const perMileRate = 1.5; // Set your per-mile rate here
+        const fare = baseFare + (perMileRate * distanceTraveled);
+        // Update the ride status and fare
+        const update = { status: "Completed", fare: fare };
+        const options = { new: true };
+        const rideEnded = await rideModel.findByIdAndUpdate(rideId, update, options);
+        if (rideEnded) {
+            const driverFilter = { _id: driverId }
+            const driverUpdate = { hasRide: false }
+            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+            res.status(200).send({
+                success: true,
+                message: "Ride ended successfully",
+                fare: fare,
+                nextScreen: 'Ratting Screen'
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                message: "Ride not ended"
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
+// Driver Ratting for customer 
 const driverRatting = async (req, res) => {
     try {
-        const { rideId, driverId, driverRating } = req.body;
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1]
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+        const { rideId, driverRating } = req.body;
         const findRide = await rideModel.findById(rideId);
         if (!findRide) {
             return res.status(404).send({
@@ -1050,24 +1352,42 @@ const driverRatting = async (req, res) => {
                 message: "This driver was not assigned to this ride"
             });
         }
-        const rate = new rattingModel({
-            customerId: findRide.customerId,
-            driverId: driverId,
-            ride: rideId,
-            customerRating: null,
-            driverRating: driverRating
-        });
-        const rattingResult = await rate.save();
-        if (rattingResult) {
-            res.status(200).send({
-                success: true,
-                message: "Rating submitted successfully"
-            });
+        const existingRating = await rattingModel.findOne({ ride: rideId, driverId: driverId });
+        if (existingRating) {
+            // Update existing rating
+            const updatedRating = await rattingModel.findByIdAndUpdate(existingRating._id, { driverRating: driverRating });
+            if (updatedRating) {
+                res.status(200).send({
+                    success: true,
+                    message: "Rating updated successfully"
+                });
+            } else {
+                res.status(400).send({
+                    success: false,
+                    message: "Rating not updated"
+                });
+            }
         } else {
-            res.status(400).send({
-                success: false,
-                message: "Rating not submitted"
+            // Create new rating
+            const rate = new rattingModel({
+                customerId: findRide.customerId,
+                driverId: driverId,
+                ride: rideId,
+                customerRating: null,
+                driverRating: driverRating
             });
+            const rattingResult = await rate.save();
+            if (rattingResult) {
+                res.status(200).send({
+                    success: true,
+                    message: "Rating submitted successfully"
+                });
+            } else {
+                res.status(400).send({
+                    success: false,
+                    message: "Rating not submitted"
+                });
+            }
         }
     } catch (error) {
         res.status(500).send({
@@ -1077,6 +1397,98 @@ const driverRatting = async (req, res) => {
         });
     }
 };
+//   get all compeleted and decline rides 
+const getAllRides = async (req, res) => {
+    try {
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1]
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+        // const driverId = req.body.driverId;
+        const status = req.body.status;
+        const findRides = await rideModel
+            .find({ driverId: driverId, status: status })
+            .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+            //.populate({ path: 'driverId', select: ['fullName', 'profileImage'] })
+            // .populate({ path: 'vehicleType', select: ['name'] })
+            .select({
+                pickupLocation: 1,
+                destinationLocation: 1,
+                paymentMethod: 1,
+                fare: 1,
+            });
+
+        if (findRides) {
+            res.status(200).send({
+                success: true,
+                message: 'All Rides',
+                Rides: findRides,
+            });
+        } else {
+            res.status(404).send({
+                success: false,
+                message: 'Not able to find rides for this driver',
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+};
+
+
+// Write to Us
+const writeToUs = async (req, res) => {
+    try {
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1]
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+        // const driverId = req.body.driverId
+        const subject = req.body.subject
+        const emailId = req.body.emailId
+        const describeYourIssue = req.body.describeYourIssue
+        const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
+        if (findDriver) {
+            const newComplaints = new writeToUsModel({
+                subject: subject,
+                emailId: emailId,
+                describeYourIssue: describeYourIssue
+            });
+            const result = await newComplaints.save();
+            if (result) {
+                res.status(200).send({
+                    success: true,
+                    message: 'New complaint send successfully'
+                })
+            }
+            else {
+                res.status(400).send({
+                    success: false,
+                    message: "Currenlt not able to send your complaint"
+                })
+            }
+        }
+        else {
+            res.status(404).send({
+                success: false,
+                message: 'Driver with this id not found'
+            })
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        })
+    }
+}
+
 // Logout Driver
 const driverLogout = async (req, res) => {
     try {
@@ -1167,64 +1579,8 @@ const driverLogout = async (req, res) => {
 //     }
 // }
 
-// Customer Login With Social 
-const driverLoginWithSocial = async (req, res) => {
-    try {
-        driverBasicDetailsMOdel.findOne({ socialId: req.body.socialId, socialMediaType: req.body.socialMediaType }, (error, result) => {
-            if (error) {
-                res.status(400).send({
-                    success: false,
-                    successCode: 400,
-                    error: error.message
-                })
-            }
-            else {
-                if (result) {
-                    res.status(200).send({
-                        success: true,
-                        successCode: 200,
-                        data: result,
-                        message: 'You Already logedIn',
-                        nextScreen: 'Welcome Screen'
-                    })
-                } else {
 
-                    const details = new driverBasicDetailsMOdel({
-                        language: req.body.language,
-                        socialId: req.body.socialId,
-                        socialMediaType: req.body.socialMediaType,
-                        fullName: req.body.fullName,
-                        email: req.body.email
-                    });
-                    details.save((error, result) => {
-                        if (error) {
-                            res.status(400).send({
-                                success: false,
-                                successCode: 400,
-                                error: error.message
-                            })
-                        }
-                        else {
-                            res.status(200).send({
-                                success: true,
-                                successCode: 200,
-                                data: result,
-                                message: "Login Successfully"
-                            })
-                        }
-                    })
-                }
-            }
-        })
-    } catch (error) {
-        res.status(500).send({
-            success: false,
-            successCode: 500,
-            message: 'Internal Server Error',
-            error: error.message
-        })
-    }
-}
+
 
 module.exports = {
 
@@ -1232,5 +1588,6 @@ module.exports = {
     driverDrivingLicence, driverVehicleDetails, driverAddBankDetails, driverTakeSelfie,
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
-    driverRatting,driverLoginWithSocial
+    driverRatting,acceptRideRequest,declineRideRequest,navigateToPickupPoint,startRide,reachedToDestination,
+    endRide,getAllRides,writeToUs
 }
