@@ -627,10 +627,10 @@ const totalUser = async (req, res) => {
           }
 
           const data = results.length;
-         const languages = result.language?.name ? result.language?.name : 'Unknown';
+//          const languages = result.language?.name ? result.language?.name : 'Unknown';
           const formattedResults = results.map((result) => ({
             _id: result._id,
-            language: languages,
+            language: result.language?.name ? result.language?.name : 'Unknown',
             fullName: result.fullName,
             mobileNumber: result.mobileNumber,
             otp: result.otp,
