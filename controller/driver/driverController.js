@@ -953,87 +953,6 @@ const deleteDriver = async (req, res) => {
     }
 }
 
-// Driver Update Personal Details
-const updatePersonalDetails = async (req, res) => {
-    try {
-        const token = req.headers.authorization.split(' ')[1];
-        const decodeToken = jwt.decode(token);
-        const driverId = decodeToken.driverId;
-
-        const mobileNumber = req.body.mobileNumber
-        const fullName = req.body.fullName
-        const address = req.body.address
-
-        if (mobileNumber && !/^\d{10}$/.test(mobileNumber)) {
-            return res.status(400).send({
-                success: false,
-                successCode: 400,
-                message: 'Please provide a valid 10-digit mobile number.'
-            });
-        }
-        if (fullName && fullName.trim().length < 2) {
-            return res.status(400).send({
-                success: false,
-                successCode: 400,
-                message: 'Please Enter Valid FullName'
-            })
-        }
-
-        const result = await driverBasicDetailsMOdel.find({ driverId })
-            .populate({ path: "language", select: ["name"] });
-        if (result) {
-            const filter = { driverId }
-            const update = {}
-            if (req.file) {
-                update.profilePhoto = req.file.filename;
-            }
-            if (mobileNumber) {
-                update.mobileNumber = mobileNumber;
-            }
-            if(fullName) {
-                update['drivingLicence.fullName'] = fullName;
-            }
-            if(address) {
-                update['drivingLicence.address'] = address;
-            }
-            const options = { new: true }
-            const selectedFields = { profilePhoto: 1, mobileNumber: 1, 'drivingLicence.fullName': 1, 'drivingLicence.address': 1 }
-            const updatedResult = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options).select(selectedFields)
-                .populate({ path: 'language', select: ['name'] });
-            if (updatedResult) {
-                res.status(200).send({
-                    success: true,
-                    successCode: 200,
-                    message: 'Personal Details Updated Successfully',
-                    data: [updatedResult]
-                })
-            }
-            else {
-                res.status(400).send({
-                    success: false,
-                    successCode: 400,
-                    message: 'Cant Update Personal Details'
-                })
-            }
-        }
-        else {
-            res.status(404).send({
-                success: false,
-                successcode: 404,
-                message: 'Data not found'
-            })
-        }
-    } catch (error) {
-        res.status(500).send({
-            success: false,
-            successCode: 500,
-            message: "Internal Server Error",
-            error: error.message
-        })
-    }
-}
-
-
 //Accept Ride Request 
 const acceptRideRequest = async (req, res) => {
     // Get token from header (Authorization)
@@ -1132,7 +1051,7 @@ const declineRideRequest = async (req, res) => {
     console.log(findRideStatus);
     if (findRideStatus && findRideStatus.status == "requested") {
         const filter = { _id: ride_id }
-        const update = { status: "Declined", driverId: driverId }
+        const update = { status: "Decline", driverId: driverId }
         const options = { new: true }
         const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
         if (rideDeclined) {
@@ -1439,6 +1358,87 @@ const getAllRides = async (req, res) => {
         });
     }
 };
+
+
+// Driver Update Personal Details
+const updatePersonalDetails = async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decodeToken = jwt.decode(token);
+        const driverId = decodeToken.driverId;
+
+        const mobileNumber = req.body.mobileNumber
+        const fullName = req.body.fullName
+        const address = req.body.address
+
+        if (mobileNumber && !/^\d{10}$/.test(mobileNumber)) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: 'Please provide a valid 10-digit mobile number.'
+            });
+        }
+        if (fullName && fullName.trim().length < 2) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: 'Please Enter Valid FullName'
+            })
+        }
+
+        const result = await driverBasicDetailsMOdel.find({ driverId })
+            .populate({ path: "language", select: ["name"] });
+        if (result) {
+            const filter = { driverId }
+            const update = {}
+            if (req.file) {
+                update.profilePhoto = req.file.filename;
+            }
+            if (mobileNumber) {
+                update.mobileNumber = mobileNumber;
+            }
+            if(fullName) {
+                update['drivingLicence.fullName'] = fullName;
+            }
+            if(address) {
+                update['drivingLicence.address'] = address;
+            }
+            const options = { new: true }
+            const selectedFields = { profilePhoto: 1, mobileNumber: 1, 'drivingLicence.fullName': 1, 'drivingLicence.address': 1 }
+            const updatedResult = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options).select(selectedFields)
+                .populate({ path: 'language', select: ['name'] });
+            if (updatedResult) {
+                res.status(200).send({
+                    success: true,
+                    successCode: 200,
+                    message: 'Personal Details Updated Successfully',
+                    data: [updatedResult]
+                })
+            }
+            else {
+                res.status(400).send({
+                    success: false,
+                    successCode: 400,
+                    message: 'Cant Update Personal Details'
+                })
+            }
+        }
+        else {
+            res.status(404).send({
+                success: false,
+                successcode: 404,
+                message: 'Data not found'
+            })
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            successCode: 500,
+            message: "Internal Server Error",
+            error: error.message
+        })
+    }
+}
 
 
 // Write to Us
