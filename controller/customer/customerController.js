@@ -805,7 +805,7 @@ const allNearestDrivers = (req, res) => {
 
 const showFareInCustomer = async (req, res) => {
   try {
-    const { pickuplocation, dropofflocation } = req.body;
+    const { pickuplocation, dropofflocation ,distance } = req.body;
     const vehicleFares = {};
 
     // Fetch the fare rates and base fare for all vehicles
@@ -818,31 +818,31 @@ const showFareInCustomer = async (req, res) => {
     }
 
     // Get the addresses of the pickup location and dropoff location
-    const options = {
-      provider: 'openstreetmap'
-    };
-    const geocoder = NodeGeocoder(options);
-    const pickupAddress = await geocoder.reverse({ lat: pickuplocation.latitude, lon: pickuplocation.longitude });
-    const dropoffAddress = await geocoder.reverse({ lat: dropofflocation.latitude, lon: dropofflocation.longitude });
+    // const options = {
+    //   provider: 'openstreetmap'
+    // };
+    // const geocoder = NodeGeocoder(options);
+    // const pickupAddress = await geocoder.reverse({ lat: pickuplocation.latitude, lon: pickuplocation.longitude });
+    // const dropoffAddress = await geocoder.reverse({ lat: dropofflocation.latitude, lon: dropofflocation.longitude });
 
     // Calculate the distance and duration between the pickup location and the dropoff location
-    const distanceToDropoff = geolib.getDistance(
-      { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
-      { latitude: dropofflocation.latitude, longitude: dropofflocation.longitude }
-    );
-    const distanceInKm = distanceToDropoff / 1000;
+    // const distanceToDropoff = geolib.getDistance(
+    //   { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+    //   { latitude: dropofflocation.latitude, longitude: dropofflocation.longitude }
+    // );
+    const distanceInKm = distance
     const durationToDropoff = Math.round((distanceInKm / 30) * 60);  // Assuming an average speed of 30 km/h
 
     // Calculate the fare for each vehicle type
     const fares = [];
     for (const vehicle of vehicles) {
       const fare = Math.round(vehicle.baseFare + (distanceInKm * vehicle.perKmCharge));
-      const fareRange = `${fare}-${fare + 15}`;
+      // const fareRange = `${fare}-${fare + 15}`;
       const vehicleData = {
         vehicleName: vehicle.name,
         vehicleImage: `https://rslsofttech.com:7000/${vehicle.uploadVehicleImage}`,
         fare,
-        fareRange,
+        // fareRange,
         distance: distanceInKm,
         duration: durationToDropoff,
         // pickupLocation: { ...pickuplocation, address: pickupAddress[0].formattedAddress },
@@ -856,8 +856,8 @@ const showFareInCustomer = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'fare details calculated.',
-      pickupLocatiobAddress: pickupAddress[0].formattedAddress,
-      dropOffLocationAddress:dropoffAddress[0].formattedAddress,
+      // pickupLocatiobAddress: pickupAddress[0].formattedAddress,
+      // dropOffLocationAddress: dropoffAddress[0].formattedAddress,
       data: fares
     });
   } catch (error) {
