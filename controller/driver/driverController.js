@@ -1047,9 +1047,11 @@ const declineRideRequest = async (req, res) => {
     // Decode token to get Driver Id
     const decodeToken = jwt.decode(token)
     const driverId = decodeToken.driverId
+    console.log(driverId)
     const ride_id = req.body.ride_id
     // const driverId = req.body.driverId
     const findRideStatus = await rideModel.findOne({ _id: ride_id });
+    console.log(findRideStatus)
     console.log(findRideStatus);
     if (findRideStatus && findRideStatus.status == "requested") {
         const filter = { _id: ride_id }
