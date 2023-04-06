@@ -169,6 +169,10 @@ const driverSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'writeToUsModel'
     }],
+    token:{
+        type:String,
+        default:""
+    }
 })
 
 driverSchema.index({ currentLocation: '2dsphere' })

@@ -223,7 +223,7 @@ admin.initializeApp({
 //   };
 
 // Driver Login
-const driverLogin = async (req, res) => {
+const driverLogin = async (req, res) => {  // 1st done
     try {
         const { mobileNumber, language, deviceToken } = req.body;
         if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
