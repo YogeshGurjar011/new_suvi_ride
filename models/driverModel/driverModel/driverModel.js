@@ -42,11 +42,12 @@ const driverSchema = new mongoose.Schema({
         },
         gender: {
             type: String,
-            enum: {
-                values: ['male', 'female', 'other'],
-                message: 'something went wrong',
-                default: 'male'
-            },
+            default: ""
+//             enum: {
+//                 values: ['male', 'female', 'other'],
+//                 message: 'something went wrong',
+//                 default: 'male'
+//             },
         },
         licenceNumber: {
             type: String,
