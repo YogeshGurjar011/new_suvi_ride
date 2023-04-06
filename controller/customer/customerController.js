@@ -620,7 +620,7 @@ const totalUser = async (req, res) => {
     try {
       customerBasicDetailsModel
         .find({})
-        .populate({ path: 'language', select: ['language'] })
+        .populate({ path: 'language', select: ['name'] })
         .exec((err, results) => {
           if (err) {
             return reject({ status: 500, message: 'Internal Server Error' });
@@ -629,9 +629,9 @@ const totalUser = async (req, res) => {
           const data = results.length;
           const formattedResults = results.map((result) => ({
             _id: result._id,
-            language: result.language?.language,
+            language: result.language?.name,
             fullName: result.fullName,
-            mobile: result.mobile,
+            mobileNumber: result.mobileNumber,
             otp: result.otp,
             email: result.email,
             socialId: result.socialId,
