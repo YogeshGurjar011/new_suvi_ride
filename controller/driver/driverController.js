@@ -1211,7 +1211,7 @@ const startRide = async (req, res) => {
         await ride.save();
 
         // Convert UTC date to local timezone and format it
-        const localDate = moment.utc(ride.rideStartTime).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+        //const localDate = moment.utc(ride.rideStartTime).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
         return res.json({ success: true, message: 'Ride started successfully', nextScreen: 'Reached to Destination Screen' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
