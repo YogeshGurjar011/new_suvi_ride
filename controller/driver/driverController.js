@@ -300,12 +300,13 @@ const driverLogin = async (req, res) => {  // 1st done
             }
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send({
             success: false,
             successCode: 500,
             message: 'Internal Server Error',
-            error: error.message,
-            console.log(error)
+            error: error.message
+            
         })
     }
 }
@@ -407,11 +408,11 @@ const driverDrivingLicence = async (req, res) => {
         }
 
     } catch (error) {
+         console.log(error)
         res.status(500).send({
             success: false,
             message: 'Internal Server Error',
-            error: error.message,
-            console.log(error)
+            error: error.message
         })
     }
 }
