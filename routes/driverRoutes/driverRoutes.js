@@ -40,11 +40,11 @@ router.post('/driver/documentsVerification',driverValidation,driverController.dr
 
 router.post('/driver/documentsVerificationByAdmin',driverValidation,driverController.checkDriverDocumentsVerificationByAdmin);
 
-router.put('/driver/updateDriverStatus/:_id',driverController.updateDriverStatus);
+router.put('/driver/updateDriverStatus',driverValidation,driverController.updateDriverStatus);
 
 router.get('/driver/totalDrivers',driverController.totalDrivers);
 
-router.put('/driver/updateCurrentLocation/:_id',driverValidation,driverController.updateDriverCurrentLocation);
+router.put('/driver/updateCurrentLocation',driverValidation,driverController.updateDriverCurrentLocation);
 
 router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
 
