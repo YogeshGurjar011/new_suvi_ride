@@ -980,6 +980,7 @@ const acceptRideRequest = async (req, res) => {
         if (rideAccepted) {
             const driverFilter = { _id: driverId }
             const driverUpdate = { isAvailable: false }
+            const option = {new :true}
             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
             const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
                 .populate({ path: 'vehicleType', select: ['name'] })

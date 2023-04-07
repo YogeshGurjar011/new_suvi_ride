@@ -142,14 +142,14 @@ const driverSchema = new mongoose.Schema({
         required: true,
         default: Date.now
     },
-    hasRide: {
-        type: Boolean,
-        default: false
-    },
-    currentRide: {
+    // hasRide: {
+    //     type: Boolean,
+    //     default: false
+    // },
+    currentRide: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'customerRidesModel'
-    },
+    }],
     passengerCapacity: {
         type: Number,
         default: 4
