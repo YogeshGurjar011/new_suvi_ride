@@ -1299,6 +1299,7 @@ const riderequest = async (req, res) => {
       const sendFCM = async (driver) => {
         const message = {
           to: "dSiJwkR3THqeYrXsGHtGZu:APA91bG9pj9IigaH-r3Kro-OqBJOVmd34kowuErLptMk6Pe9hqLXWIzkE2eN3mb-AxDTb6DXYsl_RvOp3F35Vd41MayzHyDFREl--folwcymvq0_U4JBsrK1vCuSYNX5UErVlBrZ9mDJ",
+           collapse_key: '',
           notification: {
             title: 'test',
             body: `new ride request by ${customer.fullName}`,
