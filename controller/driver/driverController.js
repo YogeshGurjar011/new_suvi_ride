@@ -1149,30 +1149,69 @@ const startRide = async (req, res) => {
 }
 
 // Reach To Destination
+// const reachedToDestination = async (req, res) => {
+//     try {
+//         const destinationLatitude = req.body.destinationLatitude; // [37.7749, -122.4194]; // example destination location!
+//         const destinationLongitude = req.body.destinationLongitude
+//         const latitude = req.body.latitude
+//         const longitude = req.body.longitude
+//         const currentLocation = {latitude,longitude} // [37.7739, -122.4312]; // example driver location
+//         const distanceThreshold = 100; // threshold distance in meters
+//         const averageDrivingSpeed = 30; // average driving speed in km/h
+
+//         // Calculate the distance and time to reach the destination location!
+//         const distance = req.body.distance; // distance from request body
+//         const distanceInKm = distance / 1000; // convert distance to kilometers
+//         const timeInMinutes = distanceInKm / (averageDrivingSpeed / 60); // time in minutes
+
+//         // Check whether the driver has reached thedestination location!
+//         if (distanceInKm <= distanceThreshold / 1000) {
+//             res.status(200).send({
+//                 success: true,
+//                 message: "You have reached the destination location!",
+//                 nextScreen: "Make Payment Screen"
+//             });
+//         } else {    
+//             res.status(200).send({
+//                 success: true,
+//                 message: `You are still ${Math.ceil(timeInMinutes)} minute(s) away from the destination location!.`
+//             });
+//         }
+//     } catch (error) {
+//         res.status(500).send({
+//             success: false,
+//             message: "Internal server error",
+//             error: error.message
+//         });
+//     }
+// };
+
 const reachedToDestination = async (req, res) => {
     try {
-        const destinationLatitude = req.body.destinationLatitude; // [37.7749, -122.4194]; // example destination location!
-        const destinationLongitude = req.body.destinationLongitude
-        const currentLocation = req.body.currentLocation; // [37.7739, -122.4312]; // example driver location
+        const destinationLatitude = req.body.destinationLatitude;
+        const destinationLongitude = req.body.destinationLongitude;
+        const latitude = req.body.latitude;
+        const longitude = req.body.longitude;
+        const currentLocation = {latitude,longitude};
         const distanceThreshold = 100; // threshold distance in meters
         const averageDrivingSpeed = 30; // average driving speed in km/h
 
         // Calculate the distance and time to reach the destination location!
         const distance = req.body.distance; // distance from request body
         const distanceInKm = distance / 1000; // convert distance to kilometers
-        const timeInMinutes = distanceInKm / (averageDrivingSpeed / 60); // time in minutes
+        const timeInMinutes = (distanceInKm / (req.body.currentSpeed || averageDrivingSpeed)) * 60; // time in minutes
 
-        // Check whether the driver has reached thedestination location!
+        // Check whether the driver has reached the destination location!
         if (distanceInKm <= distanceThreshold / 1000) {
             res.status(200).send({
                 success: true,
                 message: "You have reached the destination location!",
                 nextScreen: "Make Payment Screen"
             });
-        } else {
+        } else {    
             res.status(200).send({
                 success: true,
-                message: `You are still ${Math.ceil(timeInMinutes)} minute(s) away from the destination location!.`
+                message: `You are still ${Math.round(timeInMinutes)} minute(s) away from the destination location!.`
             });
         }
     } catch (error) {
