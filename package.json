@@ -8,10 +8,7 @@
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
     "fcm-node": "^1.6.1",
-<<<<<<< HEAD
     "firebase-admin": "^11.5.0",
-=======
->>>>>>> b223be099299361cb6f34d890dcdcdaf769614b4
     "fs": "^0.0.1-security",
     "geolib": "^3.3.3",
     "https": "^1.0.0",
