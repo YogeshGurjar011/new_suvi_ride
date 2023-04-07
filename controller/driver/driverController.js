@@ -1327,6 +1327,58 @@ const driverRatting = async (req, res) => {
         });
     }
 };
+
+// Total earning 
+const totalEarning = async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decodedToken = jwt.decode(token);
+      const driverId = decodedToken.driverId;
+      const findCompletedRides = await rideModel
+        .find({ driverId, status: "Completed" })
+        .populate({ path: "customerId", select: ["fullName", "profileImage"] })
+        .select({
+            pickupLocation: 1,
+            destinationLocation: 1,
+            paymentMethod: 1,
+            fare: 1,
+            distance: 1,
+        });
+  
+      if (findCompletedRides.length > 0) {
+        const totalEarning = findCompletedRides.reduce(
+          (acc, ride) => acc + ride.fare,
+          0
+        );
+        res.status(200).send({
+          success: true,
+          message: "Total Earnings",
+          totalEarning,
+          totalRides: findCompletedRides.map((ride) => ({
+            pickupLocation: ride.pickupLocation,
+            destinationLocation: ride.destinationLocation,
+            paymentMethod: ride.paymentMethod,
+            fare: ride.fare,
+            distance: ride.distance,
+            customerId: ride.customerId,
+          })),
+        });
+      } else {
+        res.status(404).send({
+          success: false,
+          message: "No completed rides found",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+  };
+
+
 //   get all compeleted and decline rides 
 const getAllRides = async (req, res) => {
     try {
@@ -1348,13 +1400,21 @@ const getAllRides = async (req, res) => {
                 destinationLocation: 1,
                 paymentMethod: 1,
                 fare: 1,
+                distance:1
             });
 
         if (findRides) {
             res.status(200).send({
                 success: true,
                 message: 'All Rides',
-                Rides: findRides,
+                Rides: findRides.map((ride)=>({
+                    pickupLocation:ride.pickupLocation,
+                    destinationLocation:ride.destinationLocation,
+                    paymentMethod:ride.paymentMethod,
+                    fare:ride.fare,
+                    distance:ride.distance,
+                    customerId:ride.customerId
+                }))
             });
         } else {
             res.status(404).send({
@@ -1601,5 +1661,5 @@ module.exports = {
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
     driverRatting,acceptRideRequest,declineRideRequest,navigateToPickupPoint,startRide,reachedToDestination,
-    endRide,getAllRides,writeToUs
+    endRide,totalEarning,getAllRides,writeToUs
 }

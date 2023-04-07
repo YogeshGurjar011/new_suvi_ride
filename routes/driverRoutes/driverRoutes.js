@@ -64,6 +64,8 @@ router.post('/driver/completeRide/:_id',driverValidation,driverController.endRid
 
 router.post('/driver/driverRatting',driverValidation,driverController.driverRatting);
 
+router.get('/driver/totalEarning',driverValidation,driverController.totalEarning);
+
 router.post('/driver/getAllRides',driverValidation,driverController.getAllRides);
 
 router.post('/driver/writeToUs',driverValidation,driverController.writeToUs);
