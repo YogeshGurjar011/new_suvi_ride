@@ -86,6 +86,9 @@ router.get('/admin/getAllvehicleType',adminScreenCntroller.getAllvehicleType);
 // Delete Vehical Type
 router.delete('/admin/deleteVehicalType/:_id',adminScreenCntroller.deleteVehicalType);
 
+// edit vehicle type
+router.put('/admin/updateVehicleDetails/:_id',upload.single('uploadVehicleImage'),adminScreenCntroller.updateVehicleDetails);
+
 // adminGetAllRides
 router.get('/admin/adminGetAllRides',adminScreenCntroller.adminGetAllRides);
 

@@ -901,6 +901,75 @@ const deleteVehicalType = async(req,res)=>{
     }
 }
 
+
+// edit vehicle details
+const updateVehicleDetails = async (req, res) => {
+    try {
+      const _id = req.params._id;
+      const {
+        name,
+        description,
+        perKmCharge,
+        gateWayFee,
+        cancellationFee,
+        waitingFeePermin,
+        baseFare,
+        hourFare,
+        farePerMin,
+        seats,
+        lateNightFare,
+        relaxationTimeInTime,
+        lateNightStartTime,
+        lateNightEndTime,
+        status
+      } = req.body;
+      const result = await vehicleTypeModel.updateOne(
+        { _id },
+        {
+          $set: {
+            name,
+            description,
+            perKmCharge,
+            gateWayFee,
+            cancellationFee,
+            waitingFeePermin,
+            baseFare,
+            hourFare,
+            farePerMin,
+            seats,
+            lateNightFare,
+            relaxationTimeInTime,
+            lateNightStartTime,
+            lateNightEndTime,
+            uploadVehicleImage: req.file ? req.file.filename : undefined,
+            status
+          }
+        }
+      );
+      if (result) {
+        res.status(200).send({
+          success: true,
+          successCode: 200,
+          message: "Vehicle type details updated successfully",
+          data: result
+        });
+      } else {
+        res.status(404).send({
+          success: false,
+          successCode: 404,
+          message: "Vehicle type not found"
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        successCode: 500,
+        message: "Internal Server Error",
+        error: error.message
+      });
+    }
+  };
+
 // admin get all rides in dashboard
 // const adminGetAllRides = async (req, res) => {
 //     try {
@@ -1026,11 +1095,12 @@ const adminGetAllRides = async (req, res) => {
   };
 
 
+
 module.exports = {
     addLanguages, getAllLanguages, languageGetById,editLanguage, deleteLanguage,
     addScreens, getAllScreens, editScreens,
     addNewLabelCodes, getAllLabelCodes, deleteLabelCodes,getAllLabelCodesById,
     getAllScreensByLanguage,getAllCustomerScreens,getAllDriverScreens,
-    getCustomerScreensById,getDriverScreensById,addVehicleType,getAllvehicleType,deleteVehicalType,
+    getCustomerScreensById,getDriverScreensById,addVehicleType,getAllvehicleType,deleteVehicalType,updateVehicleDetails,
     adminGetAllRides
 }
