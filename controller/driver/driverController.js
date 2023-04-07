@@ -1330,6 +1330,7 @@ const getAllRides = async (req, res) => {
         const driverId = decodeToken.driverId
         // const driverId = req.body.driverId;
         const status = req.body.status;
+        // if(status != ""
         const findRides = await rideModel
             .find({ driverId: driverId, status: status })
             .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
@@ -1375,20 +1376,20 @@ const updatePersonalDetails = async (req, res) => {
         const fullName = req.body.fullName
         const address = req.body.address
 
-        if (mobileNumber && !/^\d{10}$/.test(mobileNumber)) {
+        if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
             return res.status(400).send({
                 success: false,
                 successCode: 400,
-                message: 'Please provide a valid 10-digit mobile number.'
+                message: 'Please provide a valid mobile number in the format of +911234567890.'
             });
         }
-        if (fullName && fullName.trim().length < 2) {
-            return res.status(400).send({
-                success: false,
-                successCode: 400,
-                message: 'Please Enter Valid FullName'
-            })
-        }
+        // if (fullName && fullName.trim().length < 2) {
+        //     return res.status(400).send({
+        //         success: false,
+        //         successCode: 400,
+        //         message: 'Please Enter Valid FullName'
+        //     })
+        // }
 
         const result = await driverBasicDetailsMOdel.find({ driverId })
             .populate({ path: "language", select: ["name"] });
