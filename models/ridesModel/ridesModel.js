@@ -149,7 +149,6 @@ const customerRidesSchema = mongoose.Schema({
   },
   vehicleType: {
     type: String,
-    enum: ['car', 'bike', 'auto', 'rikshaw'],
     required: true
   },
   numberOfPassengers: {
