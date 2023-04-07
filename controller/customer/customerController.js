@@ -760,17 +760,67 @@ const updateUser = (req, res) => {
     });
 };
 
+// const allNearestDrivers = (req, res) => {
+//   const { pickupLocation } = req.body;
+//   // Query MongoDB for all drivers within a 10km radius of the pickup location
+//   driverBasicDetailsMOdel.find({
+//     isAvailable: true,
+//     Status:"online",
+//     currentLocation: {
+//       $near: {
+//         $geometry: {
+//           type: "Point",
+//           coordinates: [pickupLocation.longitude, pickupLocation.latitude],
+//         },
+//         $maxDistance: 5000, // 5km in meters
+//       },
+//     },
+//   })
+//   .then((drivers) => {
+//     // Calculate the distance and time duration to each driver using geolib
+//     const driverDistances = drivers.map((driver) => {
+//       const distance = geolib.getDistance(
+//         { latitude: pickupLocation.latitude, longitude: pickupLocation.longitude },
+//         { latitude: driver.currentLocation.coordinates[1], longitude: driver.currentLocation.coordinates[0] }
+//       );
+//       const distanceInKm = distance / 1000; // Convert meters to kilometers
+//       const duration = Math.round((distanceInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
+//       return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] ,vehicle:driver.vehicleType};
+//     });
+//     // Return the list of drivers sorted by distance
+//     const nearestDrivers = driverDistances.sort((a, b) => a.distance - b.distance);
+//       if(nearestDrivers.length === 0){
+//       res.status(404).send({
+//         message:"All Availabele Nearest Driver is 0 not available anyb driver ",
+//          data:nearestDrivers
+//        });
+//     }
+//     else{
+//       console.log(nearestDrivers)
+//       res.status(200).send({
+//         message:"All Availabele Nearest Driver",
+//          data:nearestDrivers
+//        });
+//     }
+//   })
+//   .catch((err) => {
+//     console.error(err);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   });
+// };
+
+
 const allNearestDrivers = (req, res) => {
-  const { pickupLocation } = req.body;
+  const { pickuplatitude,pickuplongitude } = req.body;
   // Query MongoDB for all drivers within a 10km radius of the pickup location
   driverBasicDetailsMOdel.find({
-    isAvailable: true,
+    status: "available",
     Status:"online",
     currentLocation: {
       $near: {
         $geometry: {
           type: "Point",
-          coordinates: [pickupLocation.longitude, pickupLocation.latitude],
+          coordinates: [pickuplongitude, pickuplatitude],
         },
         $maxDistance: 5000, // 5km in meters
       },
@@ -780,23 +830,22 @@ const allNearestDrivers = (req, res) => {
     // Calculate the distance and time duration to each driver using geolib
     const driverDistances = drivers.map((driver) => {
       const distance = geolib.getDistance(
-        { latitude: pickupLocation.latitude, longitude: pickupLocation.longitude },
+        { latitude: pickuplatitude, longitude: pickuplongitude },
         { latitude: driver.currentLocation.coordinates[1], longitude: driver.currentLocation.coordinates[0] }
       );
       const distanceInKm = distance / 1000; // Convert meters to kilometers
       const duration = Math.round((distanceInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
-      return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] ,vehicle:driver.vehicleType};
+      return { driverId: driver._id, distance: distanceInKm, duration, status: driver.status ,latitude:driver.currentLocation.coordinates[1],longitude:driver.currentLocation.coordinates[0] };
     });
     // Return the list of drivers sorted by distance
     const nearestDrivers = driverDistances.sort((a, b) => a.distance - b.distance);
       if(nearestDrivers.length === 0){
-      res.status(404).send({
-        message:"All Availabele Nearest Driver is 0 not available anyb driver ",
+      res.status(200).send({
+        message:"not available any driver in your location ",
          data:nearestDrivers
        });
     }
     else{
-      console.log(nearestDrivers)
       res.status(200).send({
         message:"All Availabele Nearest Driver",
          data:nearestDrivers
@@ -808,7 +857,6 @@ const allNearestDrivers = (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   });
 };
-
 
 // show fare in customer for pickup to dropp off location
 
