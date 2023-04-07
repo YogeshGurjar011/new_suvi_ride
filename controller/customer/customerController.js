@@ -1013,9 +1013,152 @@ const showFareInCustomer = async (req, res) => {
 // };
 
 
+// const riderequest = async (req, res) => {
+//   try {
+//     const { customerId, pickuplocation, dropofflocation, vehicleType , distance } = req.body;
+
+//     // Find the vehicle type with the fare rate for the selected vehicle type
+//     const vehicleTypeWithFare = await VehicleTypeWithFareModel.findOne({ name: vehicleType });
+//     // console.log(vehicleTypeWithFare)
+//     if (!vehicleTypeWithFare) {
+//       return res.status(400).json({ message: "Invalid vehicle type selected." });
+//     }
+//     // const distanceToDropoff = geolib.getDistance(
+//     //   { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+//     //   { latitude: dropofflocation.latitude, longitude: dropofflocation.longitude }
+//     // );
+//     const distanceInKm = distance
+//     const farerate = vehicleTypeWithFare?.perKmCharge
+//     const fare = Math.round(vehicleTypeWithFare?.baseFare + (distanceInKm * farerate));
+// console.log(fare)
+//     // Find the nearest drivers within a 10 km radius of the pickup location
+//     const drivers = await driverBasicDetailsMOdel.find({
+//       Status: "online",
+//       currentLocation: {
+//         $near: {
+//           $geometry: {
+//             type: "Point",
+//             coordinates: [pickuplocation.longitude, pickuplocation.latitude],
+//           },
+//           $maxDistance: 5000, // 10km in meters
+//         },
+//       },
+//     });
+//     console.log(drivers)
+//     if (drivers.length === 0) {
+//       return res.status(404).json({ message: "No drivers found in the area." });
+//     }
+
+//     // Calculate the distance and time duration to each driver using geolib
+//     const distanceToDriver = drivers.map((driver) => {
+//       const distance = geolib.getDistance(
+//         { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+//         { latitude: driver.currentLocation.coordinates[1], longitude: driver.currentLocation.coordinates[0] }
+//       );
+//       const distanceToDriverInKm = distance / 1000; // Convert meters to kilometers
+//       const durationToDriver = Math.round((distanceToDriverInKm / 30) * 60); // Assuming average speed of 30 km/hr, convert km to minutes
+//       return { driverId: driver._id, distance: distanceToDriverInKm.toFixed(2), durationToDriver, isAvailable: driver.isAvailable, deviceToken: driver.deviceToken };
+//     });
+
+//     // Return the list of drivers sorted by distance
+//     const nearestDrivers = distanceToDriver.sort((a, b) => a.distance - b.distance);
+
+//     // Save the ride request to the database
+//     const scheduledTime = new Date();
+//     scheduledTime.setHours(10);
+//     scheduledTime.setMinutes(30);
+//     scheduledTime.setSeconds(0);
+//     // console.log(scheduledTime.getTime())
+//     // console.log( nearestDrivers)
+//     // console.log( nearestDrivers[0].driverId)
+//     const ride = new customerRidesModel({
+//       customerId,
+//       driverId: null,
+//       pickupLocation: pickuplocation.address,
+//       pickupLatitude: pickuplocation.latitude,
+//       pickupLongitude: pickuplocation.longitude,
+//       destinationLocation: dropofflocation.address,
+//       destinationLatitude: dropofflocation.latitude,
+//       destinationLongitude: dropofflocation.longitude,
+//       vehicleType: vehicleType,
+//       numberOfPassengers: "3",
+//       scheduled: true,
+//       scheduledDate: Date.now(),
+//       bookedFor: "",
+//       fare,
+//       distance: distanceInKm,
+//       duration: Math.round((distanceInKm / 30) * 60), // Assuming average speed of 30 km/hr, convert km to minutes
+//     });
+//     const savedRide = await ride.save();
+//     const customer = await customerBasicDetailsModel.findById({ _id: savedRide.customerId })
+//       .populate({ path: 'fullName', select: ['customerId'] })
+//     console.log(customer)
+
+//     // Send the ride request to all nearest drivers
+//     const messageBody = {
+//       ride_id: savedRide._id,
+//       customerName: customer.fullName,
+//       savedRide,
+//     };
+//     console.log(messageBody);
+
+//     const responses = [];
+//     let rideData = {
+//       ride_id: savedRide._id,
+//       customer_id: customer._id,
+//       pickupLocation: savedRide.pickupLocation,
+//       pickupLatitude: savedRide.pickupLatitude,
+//       pickupLongitude: savedRide.pickupLongitude,
+//       destinationLocation: savedRide.destinationLocation,
+//       destinationLatitude: savedRide.destinationLatitude,
+//       destinationLongitude: savedRide.destinationLongitude,
+//       fare,
+//       numberOfPassengers: savedRide.numberOfPassengers,
+//       status: savedRide.status,
+//     };
+
+//     for (let i = 0; i < nearestDrivers.length; i++) {
+//       const message = {
+//         to: 'eWdC1g0hSvK4j43NKVObG1:APA91bFqGeOSgkNIhbEjjRt2CvH1APUJKk9iY02KsS4ace5WVgf-ze1D4E6qARgV_PIJonoandmhi4_NDNc13kmFJJB6WVh9BkTJvMjlF1TJ-1BuXR-Z3x9bPL49yZZd76F8voGaW7qu',
+//         notification: {
+//           title: 'test',
+//           body: `new ride request by ${customer.fullName}`,
+//           data: rideData,
+//           delivery_receipt_requested: true,
+//         },
+//       };
+
+//       fcm.send(message, function (err, resp) {
+//         if (err) {
+//           console.log('Error sending message:', err);
+//           responses.push({
+//             message: 'Error sending message:',
+//             err,
+//           });
+//         } else {
+//           console.log('Successfully sent message:', resp);
+//           responses.push({
+//             message: 'Successfully sent message:',
+//             resp,
+//           });
+//         }
+//         if (responses.length === nearestDrivers.length) {
+//           res.status(200).json({
+//             message: 'Ride request sent to nearest drivers.',
+//             ride: rideData,
+//           });
+//         }
+//       });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: 'Server error.', error });
+//   }
+// };
+
 const riderequest = async (req, res) => {
   try {
-    const { customerId, pickuplocation, dropofflocation, vehicleType , distance } = req.body;
+    const { customerId, pickuplocation, dropofflocation, vehicleType, distance } = req.body;
 
     // Find the vehicle type with the fare rate for the selected vehicle type
     const vehicleTypeWithFare = await VehicleTypeWithFareModel.findOne({ name: vehicleType });
@@ -1030,7 +1173,7 @@ const riderequest = async (req, res) => {
     const distanceInKm = distance
     const farerate = vehicleTypeWithFare?.perKmCharge
     const fare = Math.round(vehicleTypeWithFare?.baseFare + (distanceInKm * farerate));
-console.log(fare)
+    console.log(fare)
     // Find the nearest drivers within a 10 km radius of the pickup location
     const drivers = await driverBasicDetailsMOdel.find({
       Status: "online",
@@ -1116,38 +1259,74 @@ console.log(fare)
       numberOfPassengers: savedRide.numberOfPassengers,
       status: savedRide.status,
     };
-
-    for (let i = 0; i < nearestDrivers.length; i++) {
-      const message = {
-        to: 'eWdC1g0hSvK4j43NKVObG1:APA91bFqGeOSgkNIhbEjjRt2CvH1APUJKk9iY02KsS4ace5WVgf-ze1D4E6qARgV_PIJonoandmhi4_NDNc13kmFJJB6WVh9BkTJvMjlF1TJ-1BuXR-Z3x9bPL49yZZd76F8voGaW7qu',
-        notification: {
-          title: 'test',
-          body: `new ride request by ${customer.fullName}`,
-          data: rideData,
-          delivery_receipt_requested: true,
-        },
+    const driverAccepted = await new Promise((resolve, reject) => {
+      let driverAccepted = false;
+      let retries = 0;
+      const startTime = Date.now();
+      const checkRideStatus = async () => {
+        const acceptedRide = await customerRidesModel.findOne({ _id: savedRide._id, status: 'Accepted' }).exec();
+        if (acceptedRide && acceptedRide.driverId) {
+          const driver = await driverBasicDetailsMOdel.findOne({ _id: acceptedRide.driverId }).exec();
+          if (driver) {
+            const driverDetails = {
+              name:driver.drivingLicence.fullName,
+              mobilenumber: driver.mobileNumber,
+              fare: acceptedRide.fare,
+              confirmOTP: acceptedRide.confirmOTP
+            };
+            resolve(driverDetails); // Resolve with the ride details
+            return;
+          }
+        }
+    
+        if (Date.now() - startTime > 90000) { // check if 20 seconds have passed
+          resolve(false); // Resolve with false if no driver accepted the ride
+          return;
+        } else { // call the function again after 2 seconds
+          setTimeout(checkRideStatus, 2000);
+        }
       };
-
-      fcm.send(message, function (err, resp) {
-        if (err) {
-          console.log('Error sending message:', err);
-          responses.push({
-            message: 'Error sending message:',
-            err,
-          });
-        } else {
-          console.log('Successfully sent message:', resp);
-          responses.push({
-            message: 'Successfully sent message:',
-            resp,
-          });
-        }
-        if (responses.length === nearestDrivers.length) {
-          res.status(200).json({
-            message: 'Ride request sent to nearest drivers.',
-            ride: rideData,
-          });
-        }
+    
+      const sendFCM = async (driver) => {
+        const message = {
+          to: "dSiJwkR3THqeYrXsGHtGZu:APA91bG9pj9IigaH-r3Kro-OqBJOVmd34kowuErLptMk6Pe9hqLXWIzkE2eN3mb-AxDTb6DXYsl_RvOp3F35Vd41MayzHyDFREl--folwcymvq0_U4JBsrK1vCuSYNX5UErVlBrZ9mDJ",
+          notification: {
+            title: 'test',
+            body: `new ride request by ${customer.fullName}`,
+            data: rideData,
+            delivery_receipt_requested: true,
+          },
+        };
+    
+        fcm.send(message, async (err, resp) => {
+          if (err) {
+            console.log(`Error sending message to ${driver.mobilenumber}:`, err);
+            // You can push the error message to an array or log it for debugging
+          } else {
+            if (resp) {
+              console.log(`Message sent to ${driver.mobilenumber}:`, resp)
+              driverAccepted = true;
+            }
+          }
+        });
+      };
+    
+      nearestDrivers.forEach(async (driver) => {
+        await sendFCM(driver);
+      });
+    
+      checkRideStatus();
+    });
+    
+    // Send the response to the client
+    if (driverAccepted) {
+      res.status(200).send({
+        message: `${driverAccepted.mobilenumber} has accepted your ride`,
+        data: driverAccepted
+      });
+    } else {
+      res.status(404).send({
+        message: "No driver found within the given radius"
       });
     }
   } catch (error) {
