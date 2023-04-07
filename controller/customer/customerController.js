@@ -796,6 +796,7 @@ const allNearestDrivers = (req, res) => {
        });
     }
     else{
+      console.log(nearestDrivers)
       res.status(200).send({
         message:"All Availabele Nearest Driver",
          data:nearestDrivers
