@@ -28,15 +28,15 @@ router.post('/driver/driverLogin',driverController.driverLogin);
 
 // router.post('/driver/driverAppGenrateotp',driverController.driverAppGenrateotp);
 // router.post('/driver/driverAppOtpVerification',driverController.driverAppOtpVerification);
-router.post('/driver/driverdriverDrivingLicence',upload.single('uploadImage'),driverController.driverDrivingLicence);
+router.post('/driver/drivingLicence',upload.single('uploadImage'),driverController.driverDrivingLicence);
 
-router.post('/driver/driverVehicleDetails',driverValidation,upload.single('imageOfRegistrationCard'),driverController.driverVehicleDetails);
+router.post('/driver/vehicleDetails',driverValidation,upload.single('imageOfRegistrationCard'),driverController.driverVehicleDetails);
 
-router.post('/driver/driverAddBankDetails',driverValidation,driverController.driverAddBankDetails);
+router.post('/driver/addBankDetails',driverValidation,driverController.driverAddBankDetails);
 
-router.post('/driver/driverTakeSelfie',upload.single('selfie'),driverController.driverTakeSelfie);
+router.post('/driver/takeSelfie',upload.single('selfie'),driverController.driverTakeSelfie);
 
-router.post('/driver/driverDocumentsVerification',driverValidation,driverController.driverDocumentsVerification);
+router.post('/driver/documentsVerification',driverValidation,driverController.driverDocumentsVerification);
 
 router.post('/driver/documentsVerificationByAdmin',driverValidation,driverController.checkDriverDocumentsVerificationByAdmin);
 
