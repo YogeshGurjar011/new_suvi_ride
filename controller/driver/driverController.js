@@ -8,7 +8,7 @@ const rideModel = require('../../models/ridesModel/ridesModel');
 const rattingModel = require('../../models/rattingModel');
 const writeToUsModel = require('../../models/writeToUsModel');
 
-const serviceAccount2 = require('../../suviridecustomer-firebase-adminsdk-77pfg-1ca6fd5288.json');
+const serviceAccount2 = require('../../middeleware_functions/suviridecustomer-firebase-adminsdk-77pfg-1ca6fd5288.json');
 const app2 = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount2),
   databaseURL: 'https://suviridecustomer.firebaseio.com'

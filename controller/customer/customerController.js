@@ -13,7 +13,7 @@ const NodeGeocoder = require('node-geocoder');
 // const serverKey = 'AAAAjBZozHE:APA91bF2n5bBmQToPuoUowPFFWpfPx0PsJEwNjanwmiLR4YWVgSy3T6s9S7yKNQoQHNKUEXgOLE35BNrO2OfthgM02MlRDD6lpaCLJZceqCrW51TPxjFqRV4DEKVz6IJghCxqKl44hGP';
 // const fcm = new FCM(serverKey);
 const admin = require('firebase-admin');
-const serviceAccount1 = require('../../suviriderider-5db2f-firebase-adminsdk-r98pp-4a87d447f6.json');
+const serviceAccount1 = require('../../middeleware_functions/suviriderider-5db2f-firebase-adminsdk-r98pp-4a87d447f6.json');
 const app1 = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount1),
   databaseURL: 'https://suviridecustomer.firebaseio.com'
