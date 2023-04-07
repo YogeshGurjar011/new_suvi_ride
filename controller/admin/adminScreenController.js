@@ -91,7 +91,7 @@ const getAllLanguages = async (req, res) => {
 // Get All Language By Id
 const languageGetById = async(req,res)=>{
     try {
-        languagesModel.find({_id:req.params._id}, { name: 1, code: 1, status:1})
+       await languagesModel.findOne({_id:req.params._id})
         .exec((error, result) => {
             if (error) {
                 res.status(400).send({
