@@ -193,6 +193,10 @@ const customerRidesSchema = mongoose.Schema({
   rideEndTime: {
     type: Date,
     default: null
+  },
+  confirmOtp:{
+    type:Number,
+    default:""
   }
 
 

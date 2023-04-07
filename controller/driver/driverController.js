@@ -258,7 +258,7 @@ const driverLogin = async (req, res) => {  // 1st done
             if (newDriverResult) {
                 res.status(200).send({
                     success: true,
-                    data: { language: newDriverResult.language, mobileNumber: newDriverResult.mobileNumber},
+                    //data: { language: newDriverResult.language, mobileNumber: newDriverResult.mobileNumber},
                     message: 'Mobile Number Verified',
                     nextScreen: 'registration'
                 })
@@ -811,7 +811,7 @@ const updateDriverStatus = async (req, res) => {
             res.status(200).send({
                 success: true,
                 //successCode: 200,
-                data: {Status:result.Status},
+                Status:result.Status,   
                 message: 'driver status updated successfully'
             })
         }
@@ -913,7 +913,10 @@ const updateDriverCurrentLocation = async (req, res) => {
         // Save the updated driver
         const updatedDriver = await driver.save();
 
-        res.status(200).json(updatedDriver);
+        res.status(200).send({
+            success:true,
+            message:"Current Location Updated Successfully"
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -962,7 +965,8 @@ const acceptRideRequest = async (req, res) => {
     // Decode token to get Driver Id
     const decodeToken = jwt.decode(token)
     const driverId = decodeToken.driverId
-    const deviceToken = req.body.deviceToken;
+    const confirmOtp = req.body.confirmOtp
+    //const deviceToken = req.body.deviceToken;
     const ride_id = req.body.ride_id
     //const driverId = req.body.driverId
     const findRideStatus = await rideModel.findOne({ _id: ride_id });
@@ -970,12 +974,12 @@ const acceptRideRequest = async (req, res) => {
     if (findRideStatus && findRideStatus.status == "requested") {
         console.log('hello')
         const filter = { _id: ride_id }
-        const update = { status: "Accepted", driverId: driverId }
+        const update = { status: "Accepted", driverId: driverId ,confirmOtp:confirmOtp}
         const options = { new: true }
         const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
         if (rideAccepted) {
             const driverFilter = { _id: driverId }
-            const driverUpdate = { hasRide: true }
+            const driverUpdate = { isAvailable: false }
             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
             const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
                 .populate({ path: 'vehicleType', select: ['name'] })
@@ -985,23 +989,23 @@ const acceptRideRequest = async (req, res) => {
                 // const profileImage = findDriver[0].selfie;
                 // const rating = findDriver[0].ratting;
                 // const vehicleType = findDriver[0].vehicleType;
-                const deviceTokens = [deviceToken];
-                const message = {
-                    notification: {
-                        title: 'New Message',
-                        body: 'ride requested accpeted',
-                    },
-                    data: {
-                        //     fullName: fullName,
-                        //     profileImage: profileImage,
-                        //     rating: rating.toString(),
-                        //    // vehicleType: vehicleType
+                // const deviceTokens = [deviceToken];
+                // const message = {
+                //     notification: {
+                //         title: 'New Message',
+                //         body: 'ride requested accpeted',
+                //     },
+                //     data: {
+                //         //     fullName: fullName,
+                //         //     profileImage: profileImage,
+                //         //     rating: rating.toString(),
+                //         //    // vehicleType: vehicleType
 
-                    }
-                };
-                try {
-                    const response = await admin.messaging().sendToDevice(deviceTokens, message);
-                    console.log('Successfully sent message:', response);
+                //     }
+                // };
+                // try {
+                    // const response = await admin.messaging().sendToDevice(deviceTokens, message);
+                    // console.log('Successfully sent message:', response);
                     res.status(200).send({
                         success: true,
                         //data:findDriver,
@@ -1015,19 +1019,19 @@ const acceptRideRequest = async (req, res) => {
                         message: "Ride accepted successfully",
                         nextScreen: 'Navigate to pickup point Screen'
                     });
-                } catch (error) {
-                    console.error('Error sending message:', error);
-                    res.status(500).send({
-                        success: false,
-                        message: "Error sending push notification"
-                    });
-                }
+                // } catch (error) {
+                //     console.error('Error sending message:', error);
+                //     res.status(500).send({
+                //         success: false,
+                //         message: "Error sending push notification"
+                //     });
+                // }
             }
         }
     } else if (findRideStatus && findRideStatus.status == "Accepted") {
         res.status(200).send({
             success: false,
-            message: "This ride has been accepted by another driver. Please wait for a new ride.",
+            message: "This ride has already been accepted by another driver. Please wait for a new ride request.",
             nextScreen: 'Home Screen'
         });
     }
@@ -1047,6 +1051,7 @@ const declineRideRequest = async (req, res) => {
     // Decode token to get Driver Id
     const decodeToken = jwt.decode(token)
     const driverId = decodeToken.driverId
+
     console.log(driverId)
     const ride_id = req.body.ride_id
     // const driverId = req.body.driverId
@@ -1217,17 +1222,18 @@ const endRide = async (req, res) => {
         const perMileRate = 1.5; // Set your per-mile rate here
         const fare = baseFare + (perMileRate * distanceTraveled);
         // Update the ride status and fare
+        const filter = {_id}
         const update = { status: "Completed", fare: fare };
         const options = { new: true };
-        const rideEnded = await rideModel.findByIdAndUpdate(rideId, update, options);
+        const rideEnded = await rideModel.findByIdAndUpdate(filter, update, options);
         if (rideEnded) {
             const driverFilter = { _id: driverId }
-            const driverUpdate = { hasRide: false }
+            const driverUpdate = { isAvailable: true }
             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
             res.status(200).send({
                 success: true,
                 message: "Ride ended successfully",
-                fare: fare,
+                finalFare: fare,
                 nextScreen: 'Ratting Screen'
             });
         } else {
