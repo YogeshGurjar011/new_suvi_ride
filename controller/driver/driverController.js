@@ -1214,17 +1214,17 @@ const endRide = async (req, res) => {
                 message: "Payment for this ride is still pending"
             });
         }
-        // calculating distance between pickup and destination location using geolib library of javascript
-        const pickupLocationLatLong = { latitude: findRide.pickupLatitude, longitude: findRide.pickupLongitude };
-        const destinationLocationLatLOng = { latitude: findRide.destinationLatitude, longitude: findRide.destinationLongitude };
-        // Calculate the fare for the ride
-        const distanceTraveled = calculateDistance(pickupLocationLatLong, destinationLocationLatLOng);
-        const baseFare = 10; // Set your base fare here
-        const perMileRate = 1.5; // Set your per-mile rate here
-        const fare = baseFare + (perMileRate * distanceTraveled);
+        // // calculating distance between pickup and destination location using geolib library of javascript
+        // const pickupLocationLatLong = { latitude: findRide.pickupLatitude, longitude: findRide.pickupLongitude };
+        // const destinationLocationLatLOng = { latitude: findRide.destinationLatitude, longitude: findRide.destinationLongitude };
+        // // Calculate the fare for the ride
+        // const distanceTraveled = calculateDistance(pickupLocationLatLong, destinationLocationLatLOng);
+        // const baseFare = 10; // Set your base fare here
+        // const perMileRate = 1.5; // Set your per-mile rate here
+        // const fare = baseFare + (perMileRate * distanceTraveled);
         // Update the ride status and fare
         const filter = {_id}
-        const update = { status: "Completed", fare: fare };
+        const update = { status: "Completed"};
         const options = { new: true };
         const rideEnded = await rideModel.findByIdAndUpdate(filter, update, options);
         if (rideEnded) {
@@ -1234,7 +1234,7 @@ const endRide = async (req, res) => {
             res.status(200).send({
                 success: true,
                 message: "Ride ended successfully",
-                finalFare: fare,
+                //finalFare: fare,
                 nextScreen: 'Ratting Screen'
             });
         } else {
