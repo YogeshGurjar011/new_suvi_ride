@@ -1158,7 +1158,7 @@ const showFareInCustomer = async (req, res) => {
 
 const riderequest = async (req, res) => {
   try {
-    const { customerId, pickuplocation, dropofflocation, vehicleType, distance } = req.body;
+    const { customerId, pickuplat,pickuplong,pickupadd, dropofflat, dropofflong,dropoffadd, vehicleType, distance } = req.body;
 
     // Find the vehicle type with the fare rate for the selected vehicle type
     const vehicleTypeWithFare = await VehicleTypeWithFareModel.findOne({ name: vehicleType });
@@ -1181,7 +1181,7 @@ const riderequest = async (req, res) => {
         $near: {
           $geometry: {
             type: "Point",
-            coordinates: [pickuplocation.longitude, pickuplocation.latitude],
+            coordinates: [pickuplong, pickuplat],
           },
           $maxDistance: 5000, // 10km in meters
         },
@@ -1195,7 +1195,7 @@ const riderequest = async (req, res) => {
     // Calculate the distance and time duration to each driver using geolib
     const distanceToDriver = drivers.map((driver) => {
       const distance = geolib.getDistance(
-        { latitude: pickuplocation.latitude, longitude: pickuplocation.longitude },
+        { latitude: pickuplat, longitude: pickuplong },
         { latitude: driver.currentLocation.coordinates[1], longitude: driver.currentLocation.coordinates[0] }
       );
       const distanceToDriverInKm = distance / 1000; // Convert meters to kilometers
@@ -1217,12 +1217,12 @@ const riderequest = async (req, res) => {
     const ride = new customerRidesModel({
       customerId,
       driverId: null,
-      pickupLocation: pickuplocation.address,
-      pickupLatitude: pickuplocation.latitude,
-      pickupLongitude: pickuplocation.longitude,
-      destinationLocation: dropofflocation.address,
-      destinationLatitude: dropofflocation.latitude,
-      destinationLongitude: dropofflocation.longitude,
+      pickupLocation: pickupadd,
+      pickupLatitude: pickuplat,
+      pickupLongitude: pickuplong,
+      destinationLocation: dropoffadd,
+      destinationLatitude: dropofflat,
+      destinationLongitude: dropofflong,
       vehicleType: vehicleType,
       numberOfPassengers: "3",
       scheduled: true,
@@ -1259,6 +1259,8 @@ const riderequest = async (req, res) => {
       numberOfPassengers: savedRide.numberOfPassengers,
       status: savedRide.status,
     };
+
+
     const driverAccepted = await new Promise((resolve, reject) => {
       let driverAccepted = false;
       let retries = 0;
@@ -1271,6 +1273,13 @@ const riderequest = async (req, res) => {
             const driverDetails = {
               name:driver.drivingLicence.fullName,
               mobilenumber: driver.mobileNumber,
+              // vehicletype: driver.vehicleType,
+              // pickupLocation: acceptedRide.pickupLocation,
+              // pickupLatitude: acceptedRide.pickupLatitude,
+              // pickupLongitude: acceptedRide.pickupLongitude,
+              // destinationLocation: acceptedRide.destinationLocation,
+              // destinationLatitude: acceptedRide.destinationLatitude,
+              // destinationLongitude: acceptedRide.destinationLongitude,
               fare: acceptedRide.fare,
               confirmOTP: acceptedRide.confirmOTP
             };
@@ -1329,12 +1338,15 @@ const riderequest = async (req, res) => {
         message: "No driver found within the given radius"
       });
     }
+    
+
+
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Server error.', error });
   }
 };
-
 
 // const showFareInCustomer = async (req, res) => {
 //   try {
