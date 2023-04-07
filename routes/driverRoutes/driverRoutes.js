@@ -34,7 +34,7 @@ router.post('/driver/vehicleDetails',driverValidation,upload.single('imageOfRegi
 
 router.post('/driver/addBankDetails',driverValidation,driverController.driverAddBankDetails);
 
-router.post('/driver/takeSelfie',upload.single('selfie'),driverController.driverTakeSelfie);
+router.post('/driver/takeSelfie',driverValidation,upload.single('selfie'),driverController.driverTakeSelfie);
 
 router.post('/driver/documentsVerification',driverValidation,driverController.driverDocumentsVerification);
 
@@ -50,9 +50,9 @@ router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
 
 router.patch('/driver/updatePersonalDetails',driverValidation,upload.single('profilePhoto'),driverController.updatePersonalDetails);
 
-router.post('/driver/acceptRideRequest',driverController.acceptRideRequest);
+router.post('/driver/acceptRideRequest',driverValidation,driverController.acceptRideRequest);
 
-router.post('/driver/declineRideRequest',driverController.declineRideRequest);
+router.post('/driver/declineRideRequest',driverValidation,driverController.declineRideRequest);
 
 router.post('/driver/navigateToPickupPoint',driverController.navigateToPickupPoint);
 
@@ -60,13 +60,13 @@ router.post('/driver/startRide/:_id',driverController.startRide);
 
 router.post('/driver/reachedToDestination',driverController.reachedToDestination);
 
-router.post('/driver/completeRide/:_id',driverController.endRide);
+router.post('/driver/completeRide/:_id',driverValidation,driverController.endRide);
 
-router.post('/driver/driverRatting',driverController.driverRatting);
+router.post('/driver/driverRatting',driverValidation,driverController.driverRatting);
 
-router.post('/driver/getAllRides',driverController.getAllRides);
+router.post('/driver/getAllRides',driverValidation,driverController.getAllRides);
 
-router.post('/driver/writeToUs',driverController.writeToUs);
+router.post('/driver/writeToUs',driverValidation,driverController.writeToUs);
 
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
 

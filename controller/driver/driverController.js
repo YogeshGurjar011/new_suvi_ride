@@ -792,14 +792,17 @@ const checkDriverDocumentsVerificationByAdmin = async (req, res) => {
 // update driver status
 const updateDriverStatus = async (req, res) => {
     try {
-        const { _id } = req.params; // assuming the driver ID is passed as a parameter in the request URL
-        if (!_id) {
+        const token = req.headers.authorization.split(' ')[1]
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+       // const { _id } = req.params; // assuming the driver ID is passed as a parameter in the request URL
+        if (!driverId) {
             return res.status(400).send({ message: 'Please provide driver id' });
         }
         if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
-       const id =  { _id }
+       const id =  { driverId }
        const update =  {
             $set: {
                 'Status': req.body.Status
@@ -877,7 +880,10 @@ const totalDrivers = (req, res) => {
 // update driver current location 
 const updateDriverCurrentLocation = async (req, res) => {
     try {
-        const { _id } = req.params;
+        const token = req.headers.authorization.split(' ')[1]
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+        //const { _id } = req.params;
         const { latitude, longitude } = req.body;
 
         // Check if the latitude and longitude values are valid numbers
@@ -886,7 +892,7 @@ const updateDriverCurrentLocation = async (req, res) => {
         }
 
         // Find the driver by ID
-        const driver = await driverBasicDetailsMOdel.findById({_id:_id});
+        const driver = await driverBasicDetailsMOdel.findById({driverId});
 
         if (!driver) {
             return res.status(404).json({
