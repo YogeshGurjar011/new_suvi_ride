@@ -7,12 +7,13 @@ const driverBasicDetailsMOdel = require('../../models/driverModel/driverModel/dr
 const rideModel = require('../../models/ridesModel/ridesModel');
 const rattingModel = require('../../models/rattingModel');
 const writeToUsModel = require('../../models/writeToUsModel');
-const serviceAccount = require('../../middeleware_functions/suviridecustomer-firebase-adminsdk-77pfg-a098f6abae.json');
 
-//Initialize the Firebase admin SDK
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+const serviceAccount2 = require('../../middeleware_functions/suviridecustomer-firebase-adminsdk-77pfg-1ca6fd5288.json');
+const app2 = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount2),
+  databaseURL: 'https://suviridecustomer.firebaseio.com'
+}, 'app2');
+const app2Messaging = admin.messaging(app2);
 // Genrate OTP 
 // const driverAppGenrateotp = async (req, res) => {
 //     try {
@@ -1005,7 +1006,7 @@ const acceptRideRequest = async (req, res) => {
                 //     }
                 // };
                 // try {
-                    // const response = await admin.messaging().sendToDevice(deviceTokens, message);
+                    // const response = await app2Messaging.sendToDevice(deviceTokens, message);
                     // console.log('Successfully sent message:', response);
                     res.status(200).send({
                         success: true,
