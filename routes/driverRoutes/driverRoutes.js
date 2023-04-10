@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const driverController = require('../../controller/driver/driverController');
 const driverValidation = require('../../middeleware_functions/driverValidation');
+const websiteController = require('../../controller/website/websiteController');
 
 const storage = multer.diskStorage({
     destination:'adminImages/languageImages',
@@ -71,6 +72,10 @@ router.post('/driver/getAllRides',driverValidation,driverController.getAllRides)
 router.post('/driver/writeToUs',driverValidation,driverController.writeToUs);
 
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
+
+//===================================================================================
+
+router.post('/website/getFare',websiteController.getFare);
 
 
 
