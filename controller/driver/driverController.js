@@ -224,93 +224,109 @@ const app2Messaging = admin.messaging(app2);
 //   };
 
 // Driver Login
-const driverLogin = async (req, res) => {  // 1st done
+const driverLogin = async (req, res) => {
     try {
-        const { mobileNumber, language, deviceToken } = req.body;
-        if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
-            return res.status(400).send({
-                success: false,
-                successCode: 400,
-                message: 'Please provide a valid mobile number in the format of +911234567890.'
-            });
-        }
-        if (!language) {
-            return res.status(400).send({
-                success: false,
-                successCode: 400,
-                message: 'Please provide a valid language code.'
-            });
-        }
-        if (!deviceToken) {
-            return res.status(400).send({
-                success: false,
-                successCode: 400,
-                message: 'Please provide a valid fcmToken.'
-            });
-        }
-        const result = await driverBasicDetailsMOdel.find({ mobileNumber });
-        if (!result.length) {
-            const newDriver = new driverBasicDetailsMOdel({
-                mobileNumber:mobileNumber,
-                language:language,
-                deviceToken:deviceToken // save deviceToken when creating new driver
-            })
-            const newDriverResult = await newDriver.save();
-            if (newDriverResult) {
-                res.status(200).send({
-                    success: true,
-                    //data: { language: newDriverResult.language, mobileNumber: newDriverResult.mobileNumber},
-                    message: 'Mobile Number Verified',
-                    nextScreen: 'registration'
-                })
-            }
-            else {
-                res.status(400).send({
-                    success: false,
-                    successCode: 400,
-                    message: 'Mobile Number Is Not Verified '
-                })
-            }
-        }
-        else {
-            if (result[0].verificationStatus === 'failed') {
-                res.status(200).send({
-                    success: true,
-                    message: 'Driver With This Number Is Already Exits',
-                    data: {
-                        mobileNumber: result[0].mobileNumber,
-                        language: result[0].language,
-                        fullName: result[0].drivingLicence.fullName,
-                        gender: result[0].drivingLicence.gender,
-                        selfie: result[0].selfie,
-                        Status: result[0].Status,
-                        token: result[0].token,
-                        // deviceToken: result[0].deviceToken
-                    },
-                    nextScreen: 'registration'
-                })
-            }
-            else {
-                res.status(200).send({
-                    success: true,
-                    successCode: 200,
-                    message: 'This Driver Is Already Registred',
-                    data: result,
-                    nextScreen: 'welcome'
-                })
-            }
-        }
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({
+      const { mobileNumber, language, deviceToken } = req.body;
+      if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
+        return res.status(400).send({
+          success: false,
+          successCode: 400,
+          message: "Please provide a valid mobile number in the format of +911234567890.",
+        });
+      }
+      if (!language) {
+        return res.status(400).send({
+          success: false,
+          successCode: 400,
+          message: "Please provide a valid language code.",
+        });
+      }
+      if (!deviceToken) {
+        return res.status(400).send({
+          success: false,
+          successCode: 400,
+          message: "Please provide a valid fcmToken.",
+        });
+      }
+      const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
+      if (!result) {
+        const newDriver = new driverBasicDetailsMOdel({
+          mobileNumber: mobileNumber,
+          language: language,
+          deviceToken: deviceToken,
+        });
+        const newDriverResult = await newDriver.save();
+        if (newDriverResult) {
+          res.status(200).send({
+            success: true,
+            message: "Mobile Number Verified",
+            nextScreen: "registration",
+          });
+        } else {
+          res.status(400).send({
             success: false,
-            successCode: 500,
-            message: 'Internal Server Error',
-            error: error.message
-            
-        })
+            successCode: 400,
+            message: "Mobile Number Is Not Verified ",
+          });
+        }
+      } else {
+        if (result.verificationStatus === "failed") {
+          res.status(200).send({
+            success: true,
+            message: "Driver With This Number Is Already Exits",
+            data: {
+              mobileNumber: result.mobileNumber,
+              language: result.language,
+              fullName: result.drivingLicence.fullName,
+              gender: result.drivingLicence.gender,
+              selfie: result.selfie,
+              Status: result.Status,
+              token: result.token,
+              driverId:result.driverId
+              // deviceToken: result.deviceToken
+            },
+            nextScreen: "registration",
+          });
+        } else {
+          // Update the user's deviceToken and token
+          const token = jwt.sign(
+            {
+              driverId: result._id,
+              language: result.language.name,
+              mobileNumber: result.mobileNumber,
+              fullName: result.drivingLicence.fullName,
+              verificationStatus: result.verificationStatus,
+              vehicleType: result.vehicleType,
+              currentLocation: result.currentLocation,
+              hasRide: result.hasRide,
+              currentRide: result.currentRide,
+              passengerCapacity: result.passengerCapacity,
+              Status: result.Status,
+            },
+            "secretKey"
+          );
+          result.token = token;
+          result.deviceToken = deviceToken;
+          const updateToken = await result.save();
+          res.status(200).send({
+            success: true,
+            successCode: 200,
+            message: "This Driver Is Already Registered",
+            data: updateToken,
+            nextScreen: "welcome",
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        success: false,
+        successCode: 500,
+        message: "Internal Server Error",
+        error: error.message,
+      });
     }
-}
+};
 
 // Registration 
 // Registration  = Driver Driving Licence Details
@@ -1604,46 +1620,43 @@ const writeToUs = async (req, res) => {
 // Logout Driver
 const driverLogout = async (req, res) => {
     try {
-        // Get token from header (Authorication)
-        const token = req.headers.authorization.split(' ')[1];
+      // Get token from header (Authorication)
+      const token = req.headers.authorization.split(' ')[1];
 
-        // Decode token to get driver id
-        const decodedToken = jwt.decode(token);
-        const driverId = decodedToken.driverId;
-
-        // Find the driver by ID
-        const driver = await driverBasicDetailsMOdel.findById(driverId);
-
-        if (!driver) {
-            return res.status(404).json({
-                success: false,
-                successCode: 404,
-                message: 'Driver not found',
-            });
-        }
-
-        // Update driver status to offline
-        driver.Status = 'offline';
-        await driver.save();
-
-        // Invalidate the driver's token
-        await driverBasicDetailsMOdel.updateOne({ _id: driver._id }, { $unset: { token: 1 } });
-
-        // Return success response
-        return res.status(200).json({
-            success: true,
-            // successCode: 200,
-            message: 'Logout successful',
+      // Decode token to get driver id
+      const decodedToken = jwt.decode(token);
+      const mobileNumber = decodedToken.mobileNumber;
+     // const { mobileNumber } = req.body;
+      const driver = await driverBasicDetailsMOdel.findOne({ mobileNumber });
+  
+      if (!driver) {
+        return res.status(404).json({
+          success: false,
+          successCode: 404,
+          message: 'Driver not found',
         });
+      }
+  
+      // Update driver status to offline
+      driver.Status = 'offline';
+      driver.token = null;
+      driver.deviceToken = null;
+      await driver.save();
+  
+      return res.status(200).json({
+        success: true,
+        successCode: 200,
+        message: 'Logout successful',
+      });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            successCode: 500,
-            error: error.message,
-            message: 'Internal server error',
-        });
+      return res.status(500).json({
+        success: false,
+        successCode: 500,
+        error: error.message,
+        message: 'Internal server error',
+      });
     }
-};
+  };
 
 
 // const driverAddBankDetails = async (req, res) => {
