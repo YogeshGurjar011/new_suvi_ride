@@ -1094,6 +1094,57 @@ const adminGetAllRides = async (req, res) => {
     }
   };
 
+ // get label code
+  const adminGetAllScreenDetails = (req, res) => {
+    return new Promise((resolve, reject) => {
+        fieldsModel
+        .find({ screenName: req.params.screenName, appScreens: req.params.appScreens })
+        .populate({ path: "screenName", select: ["screenName"] })
+        .populate({ path: "language", select: ["name"] })
+        .exec((error, result) => {
+          if (error) {
+            reject({
+              error: error,
+              message: error.message,
+            });
+          } else {
+            if (!result.length) {
+              resolve({
+                result: result,
+                message: "These screen type details are not available",
+              });
+            } else {
+              const groupedData = result.reduce((acc, obj) => {
+                const { labelCode } = obj;
+                if (!acc[labelCode]) {
+                  acc[labelCode] = { labelCode, data: [] };
+                }
+                const language = obj.language ? obj.language.name : null;
+                acc[labelCode].data.push({
+                  _id: obj._id,
+                  language,
+                  appScreens: obj.appScreens,
+                  labelText: obj.labelText,
+                });
+                return acc;
+              }, {});
+              const data = Object.values(groupedData);
+              resolve({
+                success:true,
+                successCode:200,
+                data: data,
+              });
+            }
+          }
+        });
+    })
+      .then((result) => {
+        res.status(200).send(result);
+      })
+      .catch((error) => {
+        res.status(400).send(error);
+      });
+  };
 
 
 module.exports = {
@@ -1102,5 +1153,6 @@ module.exports = {
     addNewLabelCodes, getAllLabelCodes, deleteLabelCodes,getAllLabelCodesById,
     getAllScreensByLanguage,getAllCustomerScreens,getAllDriverScreens,
     getCustomerScreensById,getDriverScreensById,addVehicleType,getAllvehicleType,deleteVehicalType,updateVehicleDetails,
-    adminGetAllRides
+    adminGetAllRides,
+    adminGetAllScreenDetails
 }
