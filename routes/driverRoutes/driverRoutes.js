@@ -40,7 +40,7 @@ router.post('/driver/documentsVerification',driverValidation,driverController.dr
 
 router.post('/driver/documentsVerificationByAdmin',driverValidation,driverController.checkDriverDocumentsVerificationByAdmin);
 
-router.put('/driver/updateDriverStatus/:_id',driverController.updateDriverStatus);
+router.post('/driver/updateDriverStatus',driverController.updateDriverStatus);
 
 router.get('/driver/totalDrivers',driverController.totalDrivers);
 
