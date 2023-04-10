@@ -805,14 +805,14 @@ const updateDriverStatus = async (req, res) => {
         if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
-       const id =  { driverId }
+       const filter =  { driverId }
        const update =  {
             $set: {
                 'Status': req.body.Status
             }
         }
         const options = { new: true }
-        const result = await driverBasicDetailsMOdel.findOneAndUpdate( id,update,options);
+        const result = await driverBasicDetailsMOdel.findOneAndUpdate(filter,update,options);
         if (result) {
             res.status(200).send({
                 success: true,
