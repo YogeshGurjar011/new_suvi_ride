@@ -1652,7 +1652,7 @@ const allRidesByCustomer = async (req, res) => {
     const decodedToken = jwt.decode(token);
     const customerId = decodedToken.userId;
 
-    await customerRidesModel.find({ customerId: customerId })
+    await customerRidesModel.find({ customerId: customerId ,status: 'Accepted'})
       .exec((err, resp) => {
         if (err) {
           res.status(422).send({
