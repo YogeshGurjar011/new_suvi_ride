@@ -793,14 +793,19 @@ const checkDriverDocumentsVerificationByAdmin = async (req, res) => {
 // update driver status
 const updateDriverStatus = async (req, res) => {
     try {
-        const { _id } = req.params; // assuming the driver ID is passed as a parameter in the request URL
-        if (!_id) {
+         // Get token from header (Authorication)
+         const token = req.headers.authorization.split(' ')[1];
+
+         // Decode token to get driver id
+         const decodedToken = jwt.decode(token);
+         const driverId = decodedToken.driverId;
+        if (!driverId) {
             return res.status(400).send({ message: 'Please provide driver id' });
         }
         if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
-       const id =  { _id }
+       const id =  { driverId }
        const update =  {
             $set: {
                 'Status': req.body.Status
