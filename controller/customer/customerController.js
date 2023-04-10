@@ -1518,11 +1518,13 @@ const riderequest = async (req, res) => {
         if (acceptedRide && acceptedRide.driverId) {
           const driver = await driverBasicDetailsMOdel.findOne({ _id: acceptedRide.driverId }).exec();
           if (driver) {
-            const driverDetails = {
+             const driverDetails = {
+              driverId:acceptedRide.driverId,
               name: driver.drivingLicence.fullName,
               mobilenumber: driver.mobileNumber,
               fare: acceptedRide.fare,
-              confirmOTP: acceptedRide.confirmOtp
+              confirmOtp: acceptedRide.confirmOtp,
+              rideStatus:acceptedRide.status
             };
             resolve(driverDetails); // Resolve with the ride details
             return;
