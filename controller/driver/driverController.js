@@ -275,6 +275,7 @@ const driverLogin = async (req, res) => {
             success: true,
             message: "Driver With This Number Is Already Exits",
             data: {
+              driverId:result._id,
               mobileNumber: result.mobileNumber,
               language: result.language,
               fullName: result.drivingLicence.fullName,
@@ -282,7 +283,7 @@ const driverLogin = async (req, res) => {
               selfie: result.selfie,
               Status: result.Status,
               token: result.token,
-              driverId:result.driverId
+             
               // deviceToken: result.deviceToken
             },
             nextScreen: "registration",
