@@ -1803,7 +1803,31 @@ const customerrRatting = async (req, res) => {
   }
 };
 
+// getDriverCurrentLocation
+const getDriverCurrentLocation = async (req, res) => {
+  try {
+    const driver = await driverBasicDetailsMOdel.findById(req.body._id);
+    
+    if (!driver) {
+      return res.status(404).json({ message: "Driver not found." });
+    }
+
+    const { currentLocation: { coordinates } } = driver;
+    const [driverlongitude, driverlatitude] = coordinates;
+
+    res.status(200).json({
+      success: true,
+      successCode: 200,
+      message: "Driver location retrieved successfully.",
+      data: { driverlatitude, driverlongitude }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: `Server error. ${error}` });
+  }
+}
+
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting
+    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting , getDriverCurrentLocation
 }
