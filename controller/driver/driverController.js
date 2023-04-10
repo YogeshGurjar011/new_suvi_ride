@@ -793,26 +793,21 @@ const checkDriverDocumentsVerificationByAdmin = async (req, res) => {
 // update driver status
 const updateDriverStatus = async (req, res) => {
     try {
-         // Get token from header (Authorication)
-         const token = req.headers.authorization.split(' ')[1];
-
-         // Decode token to get driver id
-         const decodedToken = jwt.decode(token);
-         const driverId = decodedToken.driverId;
-        if (!driverId) {
+        const { _id } = req.params; // assuming the driver ID is passed as a parameter in the request URL
+        if (!_id) {
             return res.status(400).send({ message: 'Please provide driver id' });
         }
         if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
-       const filter =  { driverId }
+       const id =  { _id }
        const update =  {
             $set: {
                 'Status': req.body.Status
             }
         }
         const options = { new: true }
-        const result = await driverBasicDetailsMOdel.findOneAndUpdate(filter,update,options);
+        const result = await driverBasicDetailsMOdel.findOneAndUpdate( id,update,options);
         if (result) {
             res.status(200).send({
                 success: true,
@@ -883,22 +878,16 @@ const totalDrivers = (req, res) => {
 // update driver current location 
 const updateDriverCurrentLocation = async (req, res) => {
     try {
-        // Get token from header (Authorication)
-        const token = req.headers.authorization.split(' ')[1];
-
-        // Decode token to get driver id
-        const decodedToken = jwt.decode(token);
-        const driverId = decodedToken.driverId;
-//         const { _id } = req.params;
-        const { driverlatitude, driverlongitude } = req.body;
+        const { _id } = req.params;
+        const { latitude, longitude } = req.body;
 
         // Check if the latitude and longitude values are valid numbers
-        if (!isFinite(driverlatitude) || !isFinite(driverlongitude)) {
+        if (!isFinite(latitude) || !isFinite(longitude)) {
             throw new Error('Latitude and longitude must be valid numbers');
         }
 
         // Find the driver by ID
-        const driver = await driverBasicDetailsMOdel.findById({_id:driverId});
+        const driver = await driverBasicDetailsMOdel.findById({_id:_id});
 
         if (!driver) {
             return res.status(404).json({
@@ -919,7 +908,7 @@ const updateDriverCurrentLocation = async (req, res) => {
         // Update the driver's current location
         driver.currentLocation = {
             type: 'Point',
-            coordinates: [driverlongitude, driverlatitude],
+            coordinates: [longitude, latitude],
         };
 
         // Save the updated driver
