@@ -1786,6 +1786,75 @@ const driverLogout = async (req, res) => {
 //     }
 // }
 
+// new get tota ries with different status
+const getTotalRidesWithStatus = async (req, res) => {
+    try {
+      // Get token from header (Authorization)
+      const token = req.headers.authorization.split(' ')[1];
+      // Decode token to get Driver Id
+      const decodeToken = jwt.decode(token);
+      const driverId = decodeToken.driverId;
+  
+      const findRides = await rideModel
+        .find({ driverId: driverId, status: { $in: ["Completed", "Ongoing", "Decline"] } })
+        .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+        .select({
+          pickupLocation: 1,
+          destinationLocation: 1,
+          paymentMethod: 1,
+          fare: 1,
+          distance: 1,
+          status: 1,
+          _id: 0,
+          customerId: 1
+        });
+  
+      if (findRides) {
+        const totalRides = [
+          { status: "Completed", data: [] },
+          { status: "Ongoing", data: [] },
+          { status: "Decline", data: [] }
+        ];
+  
+        findRides.forEach((ride) => {
+          const rideData = {
+            pickupLocation: ride.pickupLocation,
+            destinationLocation: ride.destinationLocation,
+            paymentMethod: ride.paymentMethod,
+            fare: ride.fare,
+            distance: ride.distance,
+            customerId: ride.customerId._id,
+            customerName: ride.customerId.fullName
+          };
+  
+          if (ride.status === "Completed") {
+            totalRides[0].data.push(rideData);
+          } else if (ride.status === "Ongoing") {
+            totalRides[1].data.push(rideData);
+          } else if (ride.status === "Decline") {
+            totalRides[2].data.push(rideData);
+          }
+        });
+  
+        res.status(200).send({
+          success: true,
+          message: 'All Rides',
+          rides: totalRides,
+        });
+      } else {
+        res.status(404).send({
+          success: false,
+          message: 'Not able to find rides for this driver',
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        message: 'Internal server error',
+        error: error.message,
+      });
+    }
+  };
 
 
 
@@ -1796,5 +1865,5 @@ module.exports = {
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
     driverRatting,acceptRideRequest,declineRideRequest,navigateToPickupPoint,startRide,reachedToDestination,
-    endRide,totalEarning,getAllRides,writeToUs,getTotalRides
+    endRide,totalEarning,getAllRides,writeToUs,getTotalRides,getTotalRidesWithStatus
 }
