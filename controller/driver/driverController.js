@@ -1488,6 +1488,81 @@ const getAllRides = async (req, res) => {
     }
 };
 
+//   get all compeleted and decline rides 
+const getTotalRides = async (req, res) => {
+    try {
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1]
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+
+        const findRides = await rideModel
+            .find({ driverId: driverId, status: { $in: ["Completed", "Ongoing", "Decline"] } })
+            .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+            .select({
+                pickupLocation: 1,
+                destinationLocation: 1,
+                paymentMethod: 1,
+                fare: 1,
+                distance: 1,
+                status: 1,
+                _id: 0,
+                customerId: 1
+            });
+
+        if (findRides) {
+            const totalRides = findRides.reduce((acc, ride) => {
+                if (ride.status === "Completed") {
+                    acc.completedRides.push({
+                        pickupLocation: ride.pickupLocation,
+                        destinationLocation: ride.destinationLocation,
+                        paymentMethod: ride.paymentMethod,
+                        fare: ride.fare,
+                        distance: ride.distance,
+                        customerId: ride.customerId
+                    });
+                } else if (ride.status === "Ongoing") {
+                    acc.ongoingRide.push({
+                        pickupLocation: ride.pickupLocation,
+                        destinationLocation: ride.destinationLocation,
+                        paymentMethod: ride.paymentMethod,
+                        fare: ride.fare,
+                        distance: ride.distance,
+                        customerId: ride.customerId
+                    });
+                } else if (ride.status === "Decline") {
+                    acc.declineRides.push({
+                        pickupLocation: ride.pickupLocation,
+                        destinationLocation: ride.destinationLocation,
+                        paymentMethod: ride.paymentMethod,
+                        fare: ride.fare,
+                        distance: ride.distance,
+                        customerId: ride.customerId
+                    });
+                }
+                return acc;
+            }, { completedRides: [], ongoingRide: [], declineRides: [] });
+            res.status(200).send({
+                success: true,
+                message: 'All Rides',
+                totalRides: totalRides,
+            });
+        } else {
+            res.status(404).send({
+                success: false,
+                message: 'Not able to find rides for this driver',
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+};
+
 
 // Driver Update Personal Details
 const updatePersonalDetails = async (req, res) => {
@@ -1715,5 +1790,5 @@ module.exports = {
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
     driverRatting,acceptRideRequest,declineRideRequest,navigateToPickupPoint,startRide,reachedToDestination,
-    endRide,totalEarning,getAllRides,writeToUs
+    endRide,totalEarning,getAllRides,writeToUs,getTotalRides
 }

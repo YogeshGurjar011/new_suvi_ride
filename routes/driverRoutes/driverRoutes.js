@@ -69,6 +69,8 @@ router.get('/driver/totalEarning',driverValidation,driverController.totalEarning
 
 router.post('/driver/getAllRides',driverValidation,driverController.getAllRides);
 
+router.get('/driver/getTotalRides',driverValidation,driverController.getTotalRides);
+
 router.post('/driver/writeToUs',driverValidation,driverController.writeToUs);
 
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
