@@ -1408,7 +1408,7 @@ const showFareInCustomer = async (req, res) => {
 
 const riderequest = async (req, res) => {
   try {
-    const { customerId, pickuplat, pickuplong, pickupadd, dropofflat, dropofflong, dropoffadd, vehicleType, distance } = req.body;
+    const { customerId, pickuplat, pickuplong, pickupadd, dropofflat, dropofflong, dropoffadd, vehicleType, distance , fcmToken } = req.body;
 
     // Find the vehicle type with the fare rate for the selected vehicle type
     const vehicleTypeWithFare = await VehicleTypeWithFareModel.findOne({ name: vehicleType });
@@ -1539,7 +1539,8 @@ const riderequest = async (req, res) => {
         }
       };
       const sendFCM = async (driver) => {
-        const deviceToken = "eaDX6OsvSKyVCVxLOps6tO:APA91bG2Nutdj8P-3IbQriQ_33GSiQ3dVWVMs_uWxkn58gR0vnYbHAk-t_bpgmMOcVkNe3PYfvzZwXcj1Jvxe6_AaJzbBDYGB2HnAkRDJAUOWR4KnYX3sv_noE7xQpL8RZ4TEHSVB0kq";
+//         const deviceToken = "eaDX6OsvSKyVCVxLOps6tO:APA91bG2Nutdj8P-3IbQriQ_33GSiQ3dVWVMs_uWxkn58gR0vnYbHAk-t_bpgmMOcVkNe3PYfvzZwXcj1Jvxe6_AaJzbBDYGB2HnAkRDJAUOWR4KnYX3sv_noE7xQpL8RZ4TEHSVB0kq";
+        const deviceToken = fcmToken;
         const message = {
           notification: {
             title: 'New Ride Request',
