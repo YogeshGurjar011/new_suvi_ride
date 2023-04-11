@@ -895,16 +895,22 @@ const totalDrivers = (req, res) => {
 // update driver current location 
 const updateDriverCurrentLocation = async (req, res) => {
     try {
-        const { _id } = req.params;
-        const { latitude, longitude } = req.body;
+         // Get token from header (Authorication)
+        const token = req.headers.authorization.split(' ')[1];
+
+        // Decode token to get driver id
+        const decodedToken = jwt.decode(token);
+        const driverId = decodedToken.driverId;
+      
+        const { driverlatitude, driverlongitude } = req.body;
 
         // Check if the latitude and longitude values are valid numbers
-        if (!isFinite(latitude) || !isFinite(longitude)) {
+        if (!isFinite(driverlatitude) || !isFinite(driverlongitude)) {
             throw new Error('Latitude and longitude must be valid numbers');
         }
 
         // Find the driver by ID
-        const driver = await driverBasicDetailsMOdel.findById({_id:_id});
+        const driver = await driverBasicDetailsMOdel.findById({_id:driverId});
 
         if (!driver) {
             return res.status(404).json({
@@ -925,7 +931,7 @@ const updateDriverCurrentLocation = async (req, res) => {
         // Update the driver's current location
         driver.currentLocation = {
             type: 'Point',
-            coordinates: [longitude, latitude],
+            coordinates: [driverlongitude, driverlatitude],
         };
 
         // Save the updated driver
