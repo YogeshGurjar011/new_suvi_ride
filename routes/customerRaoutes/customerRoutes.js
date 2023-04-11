@@ -35,7 +35,9 @@ router.get('/customer/allRidesByCustomer',customerValidation,customerController.
 
 router.post('/customer/customerLogout',customerValidation,customerController.customerLogout);
 
-router.post('/customer/customerrRatting',customerController.customerrRatting)
+router.post('/customer/customerrRatting',customerController.customerrRatting);
+
+router.post('/customer/getDriverCurrentLocation',customerController.getDriverCurrentLocation);
 
 //router.post('/payment',customerController.paymentGetway);
 

@@ -1518,11 +1518,13 @@ const riderequest = async (req, res) => {
         if (acceptedRide && acceptedRide.driverId) {
           const driver = await driverBasicDetailsMOdel.findOne({ _id: acceptedRide.driverId }).exec();
           if (driver) {
-            const driverDetails = {
+             const driverDetails = {
+              driverId:acceptedRide.driverId,
               name: driver.drivingLicence.fullName,
               mobilenumber: driver.mobileNumber,
               fare: acceptedRide.fare,
-              confirmOTP: acceptedRide.confirmOtp
+              confirmOtp: acceptedRide.confirmOtp,
+              rideStatus:acceptedRide.status
             };
             resolve(driverDetails); // Resolve with the ride details
             return;
@@ -1646,36 +1648,58 @@ const riderequest = async (req, res) => {
 // all rides by customer
 const allRidesByCustomer = async (req, res) => {
   try {
+    // Extract token from headers
     const token = req.headers.authorization.split(' ')[1];
 
-    // Decode token to get Mobile Number 
+    // Decode token to get customer ID
     const decodedToken = jwt.decode(token);
     const customerId = decodedToken.userId;
 
-    await customerRidesModel.find({ customerId: customerId })
-      .exec((err, resp) => {
-        if (err) {
-          res.status(422).send({
-            message: err.message,
-            error: err
-          })
-        }
-        else {
-          if (resp) {
-            res.status(200).send({
-              message: "All Rides By Customer",
-              count: resp.length,
-              data: resp
-            })
-          }
-          else {
-            res.status(200).send({
-              message: "Not Found Any Rides"
-            })
-          }
-        }
-      })
+    // Find all rides of the customer
+    const rides = await customerRidesModel.find({ customerId });
 
+    if (rides.length === 0) {
+      return res.status(404).json({ message: "No rides found for the customer" });
+    }
+
+    const details = await Promise.all(rides.map(async (ride) => {
+      // Find driver details of each ride
+      const driver = await driverBasicDetailsMOdel.findById(ride.driverId);
+
+      return {
+        paymentStatus: ride.paymentStatus,
+        rideStartTime: ride.rideStartTime,
+        rideEndTime: ride.rideEndTime,
+        confirmOtp: ride.confirmOtp,
+        _id: ride._id,
+        customerId: ride.customerId,
+        driverId: ride.driverId,
+        driverName: driver ? (driver.drivingLicence ? driver.drivingLicence.fullName : null) : null,
+        pickupLocation: ride.pickupLocation,
+        pickupLatitude: ride.pickupLatitude,
+        pickupLongitude: ride.pickupLongitude,
+        destinationLocation: ride.destinationLocation,
+        destinationLatitude: ride.destinationLatitude,
+        destinationLongitude: ride.destinationLongitude,
+        distance: ride.distance,
+        fare: ride.fare,
+        vehicleType: ride.vehicleType,
+        numberOfPassengers: ride.numberOfPassengers,
+        scheduled: ride.scheduled,
+        scheduledDate: ride.scheduledDate,
+        bookedFor: ride.bookedFor,
+        status: ride.status,
+        createdAt: ride.createdAt,
+        updatedAt: ride.updatedAt,
+        __v: ride.__v
+      };
+    }));
+
+    res.status(200).json({
+      message: "All rides by customer",
+      count: details.length,
+      data: details
+    });
 
   } catch (error) {
     console.error(error);
@@ -1803,7 +1827,31 @@ const customerrRatting = async (req, res) => {
   }
 };
 
+// getDriverCurrentLocation
+const getDriverCurrentLocation = async (req, res) => {
+  try {
+    const driver = await driverBasicDetailsMOdel.findById(req.body._id);
+    
+    if (!driver) {
+      return res.status(404).json({ message: "Driver not found." });
+    }
+
+    const { currentLocation: { coordinates } } = driver;
+    const [driverlongitude, driverlatitude] = coordinates;
+
+    res.status(200).json({
+      success: true,
+      successCode: 200,
+      message: "Driver location retrieved successfully.",
+      data: { driverlatitude, driverlongitude }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: `Server error. ${error}` });
+  }
+}
+
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting
+    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting , getDriverCurrentLocation
 }
