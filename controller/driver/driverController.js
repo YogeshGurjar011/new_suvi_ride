@@ -386,6 +386,8 @@ const driverDrivingLicence = async (req, res) => {
             const options = { new: true };
             const result = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options)
                // .populate({ path: 'language', select: ['name'] })
+            
+            console.log(result)
             if (result) {
                 const { _id, language, mobileNumber, otp, fullName, verificationStatus, vehicleType, currentLocation, hasRide, currentRide, passengerCapacity, Status } = result;
                 const token = jwt.sign({ driverId: _id, language: language.name, mobileNumber: mobileNumber, fullName: fullName, verificationStatus: verificationStatus, vehicleType: vehicleType, currentLocation: currentLocation, hasRide: hasRide, currentRide: currentRide, passengerCapacity: passengerCapacity, Status: Status },
@@ -398,7 +400,7 @@ const driverDrivingLicence = async (req, res) => {
                         //successCode: 200,
                         //data: result,
                         message: 'Driving Licence Added Successfully',
-                        nextFiled:"Vehicle Details",
+                        nextFiled:"vehicle_detail",
                         token
                     });
                 }
@@ -439,7 +441,7 @@ const driverDrivingLicence = async (req, res) => {
 const driverVehicleDetails = async (req, res) => {
     try {
         const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity,vehicleType } = req.body;
-
+  console.log("--------------------data",req.body)
         // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
 
@@ -489,7 +491,7 @@ const driverVehicleDetails = async (req, res) => {
                     //successCode: 200,
                     data: results,
                     message: 'Vehicle Details added Successfully',
-                    nextFiled:'Add Bank Details'
+                    nextFiled:'take_selfie'
                 })
             }
             else {
@@ -651,7 +653,7 @@ const driverTakeSelfie = async (req, res) => {
                     // successCode: 200,
                     // data: results,
                     message: 'Selfie uploaded successfully',
-                    nextFiled:"Make Payment"
+                    nextFiled:"make_payment"
                 })
             }
             else {

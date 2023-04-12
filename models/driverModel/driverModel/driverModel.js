@@ -125,7 +125,7 @@ const driverSchema = new mongoose.Schema({
     vehicleType: {
         type: String,
         enum: ['car', 'bike', 'auto'],
-        default: "auto"
+        default: 'auto'
     },
     currentLocation: {
         type: {
