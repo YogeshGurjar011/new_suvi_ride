@@ -701,7 +701,7 @@ const driverDocumentsVerification = async (req, res) => {
             })
         }
         else {
-            const { verificationStatus, drivingLicence, vehiclesDetails, bankDetails } = result
+            const { verificationStatus, drivingLicence, vehiclesDetails} = result
             if (drivingLicence.verification !== 'verified') {
                 return res.status(400).send({
                     success: false,
@@ -716,20 +716,20 @@ const driverDocumentsVerification = async (req, res) => {
                     message: 'Your Vehicles Details Verification is pendding it will take some time to verify'
                 })
             }
-            if (bankDetails.verification !== 'verified') {
-                return res.status(400).send({
-                    success: false,
-                    successCode: 400,
-                    message: 'Your Bank Details Verification is pendding it will take some time to verify'
-                })
-            }
+            // if (bankDetails.verification !== 'verified') {
+            //     return res.status(400).send({
+            //         success: false,
+            //         successCode: 400,
+            //         message: 'Your Bank Details Verification is pendding it will take some time to verify'
+            //     })
+            // }
 
             if (verificationStatus === 'verified' && drivingLicence.verification === 'verified' &&
-                vehiclesDetails.verification === 'verified' && bankDetails.verification === 'verified') {
+                vehiclesDetails.verification === 'verified') {
                 res.status(200).send({
                     success: true,
                     successCode: 200,
-                    data: result,
+                   // data: result,
                     message: 'Registration successfull',
                     nextScreen: 'Home Screen'
                 })
