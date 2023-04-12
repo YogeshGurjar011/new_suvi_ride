@@ -398,7 +398,7 @@ const driverDrivingLicence = async (req, res) => {
                         //successCode: 200,
                         //data: result,
                         message: 'Driving Licence Added Successfully',
-                        nextFiled:"Vehicle Details",
+                        nextFiled:"vehicle_detail",
                         token
                     });
                 }
@@ -489,7 +489,7 @@ const driverVehicleDetails = async (req, res) => {
                     //successCode: 200,
                    // data: results,
                     message: 'Vehicle Details added Successfully',
-                    nextFiled:'Add Bank Details'
+                    nextFiled:'take_selfie'
                 })
             }
             else {
@@ -651,7 +651,7 @@ const driverTakeSelfie = async (req, res) => {
                     // successCode: 200,
                     // data: results,
                     message: 'Selfie uploaded successfully',
-                    nextFiled:"Make Payment"
+                    nextFiled:"make_payment"
                 })
             }
             else {
