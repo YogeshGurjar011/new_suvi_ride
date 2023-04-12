@@ -653,7 +653,8 @@ const driverTakeSelfie = async (req, res) => {
                     // successCode: 200,
                     // data: results,
                     message: 'Selfie uploaded successfully',
-                    nextFiled:"make_payment"
+//                     nextFiled:"make_payment"
+                   nextFiled:"verification"
                 })
             }
             else {
