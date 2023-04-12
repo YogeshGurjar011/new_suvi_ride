@@ -438,7 +438,7 @@ const driverDrivingLicence = async (req, res) => {
 // Registration  = Driver Vehicle Details
 const driverVehicleDetails = async (req, res) => {
     try {
-        const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity } = req.body;
+        const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity,vehicleType } = req.body;
 
         // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
@@ -479,7 +479,7 @@ const driverVehicleDetails = async (req, res) => {
             .populate({ path: 'language', select: ['name'] });;
         if (result) {
             const filter = { mobileNumber: mobileNumber };
-            const update = { $set: { 'vehiclesDetails.vehicleModelNumber': vehicleModelNumber, 'vehiclesDetails.registrationID': registrationID, 'vehiclesDetails.dateofRegistration': dateofRegistration, 'vehiclesDetails.registrationValidity': registrationValidity, 'vehiclesDetails.imageOfRegistrationCard': req.file.filename } };
+            const update = { $set: { 'vehiclesDetails.vehicleModelNumber': vehicleModelNumber, 'vehiclesDetails.registrationID': registrationID, 'vehiclesDetails.dateofRegistration': dateofRegistration, 'vehiclesDetails.registrationValidity': registrationValidity, 'vehiclesDetails.imageOfRegistrationCard': req.file.filename,vehicleType:vehicleType } };
             const options = { new: true };
             const results = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options)
                 .populate({ path: 'language', select: ['name'] });;
@@ -487,7 +487,7 @@ const driverVehicleDetails = async (req, res) => {
                 res.status(200).send({
                     success: true,
                     //successCode: 200,
-                    //data: results,
+                    data: results,
                     message: 'Vehicle Details added Successfully',
                     nextFiled:'Add Bank Details'
                 })
