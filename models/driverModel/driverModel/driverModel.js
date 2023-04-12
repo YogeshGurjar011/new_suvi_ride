@@ -84,11 +84,11 @@ const driverSchema = new mongoose.Schema({
             default: ""
         },
         dateofRegistration: {
-            type: Date,
+            type: String,
             default: Date.now
         },
         registrationValidity: {
-            type: Date,
+            type: String,
             default: Date.now
         },
         imageOfRegistrationCard: {
