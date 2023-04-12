@@ -487,7 +487,7 @@ const driverVehicleDetails = async (req, res) => {
                 res.status(200).send({
                     success: true,
                     //successCode: 200,
-                    data: results,
+                   // data: results,
                     message: 'Vehicle Details added Successfully',
                     nextFiled:'Add Bank Details'
                 })
