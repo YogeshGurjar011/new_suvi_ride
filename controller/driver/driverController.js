@@ -386,6 +386,8 @@ const driverDrivingLicence = async (req, res) => {
             const options = { new: true };
             const result = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options)
                // .populate({ path: 'language', select: ['name'] })
+            
+            console.log(result)
             if (result) {
                 const { _id, language, mobileNumber, otp, fullName, verificationStatus, vehicleType, currentLocation, hasRide, currentRide, passengerCapacity, Status } = result;
                 const token = jwt.sign({ driverId: _id, language: language.name, mobileNumber: mobileNumber, fullName: fullName, verificationStatus: verificationStatus, vehicleType: vehicleType, currentLocation: currentLocation, hasRide: hasRide, currentRide: currentRide, passengerCapacity: passengerCapacity, Status: Status },
