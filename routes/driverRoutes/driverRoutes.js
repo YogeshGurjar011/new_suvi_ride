@@ -75,6 +75,8 @@ router.post('/driver/writeToUs',driverValidation,driverController.writeToUs);
 
 router.patch('/driver/driverLogout',driverValidation,driverController.driverLogout);
 
+router.get('/driver/getTotalRidesWithStatus',driverValidation,driverController.getTotalRidesWithStatus);
+
 //===================================================================================
 
 router.post('/website/getFare',websiteController.getFare);

@@ -1540,6 +1540,7 @@ const riderequest = async (req, res) => {
       };
       const sendFCM = async (driver) => {
         const deviceToken = "eaDX6OsvSKyVCVxLOps6tO:APA91bG2Nutdj8P-3IbQriQ_33GSiQ3dVWVMs_uWxkn58gR0vnYbHAk-t_bpgmMOcVkNe3PYfvzZwXcj1Jvxe6_AaJzbBDYGB2HnAkRDJAUOWR4KnYX3sv_noE7xQpL8RZ4TEHSVB0kq";
+//         const deviceToken = fcmToken;
         const message = {
           notification: {
             title: 'New Ride Request',
@@ -1851,7 +1852,47 @@ const getDriverCurrentLocation = async (req, res) => {
   }
 }
 
+// cancle ride by customer
+const cancelRideByCustomer = async (req, res) => {
+  try {
+    const { rideId } = req.body;
+
+    const rideDetails = await customerRidesModel.findById(rideId);
+
+    if (!rideDetails) {
+      return res.status(404).send({ message: "Ride not found" });
+    }
+
+    if (rideDetails.status === 'Decline') {
+      return res.status(400).send({ message: "Ride already cancelled" });
+    }
+
+    if (rideDetails.status !== 'requested' && rideDetails.status !== 'Accepted') {
+      return res.status(400).send({ message: "Cannot cancel ride at this stage" });
+    }
+
+    const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+
+// Get the month name from the current date in IST
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const rideEndTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+
+    const updatedRideDetails = await customerRidesModel.findByIdAndUpdate(
+      rideDetails._id,
+      { $set: { status: 'Decline' , updatedAt:updatedAt, rideEndTime:rideEndTime} },
+      { new: true }
+    );
+
+    res.status(200).send({ message: "Ride cancelled successfully", updatedRideDetails });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: `Server error. ${error}` });
+  }
+}
+
 module.exports = {
   CustmerLogin, otpVerification, customerRegistration, customerLoginWithSocial,totalUser,deleteCustomer,updateUser,
-    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting , getDriverCurrentLocation
+    allNearestDrivers,showFareInCustomer,riderequest, allRidesByCustomer, customerLogout, customerrRatting , getDriverCurrentLocation, cancelRideByCustomer
 }
