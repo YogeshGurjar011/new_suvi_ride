@@ -39,7 +39,7 @@ router.post('/customer/customerrRatting',customerController.customerrRatting);
 
 router.post('/customer/getDriverCurrentLocation',customerController.getDriverCurrentLocation);
 
-router.put('/customer/cancelRideByCustomer',customerController.cancelRideByCustomer);
+// router.put('/customer/cancelRideByCustomer',customerController.cancelRideByCustomer);
 
 //router.post('/payment',customerController.paymentGetway);
 
