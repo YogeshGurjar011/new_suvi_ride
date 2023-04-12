@@ -441,7 +441,7 @@ const driverDrivingLicence = async (req, res) => {
 const driverVehicleDetails = async (req, res) => {
     try {
         const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity,vehicleType } = req.body;
-
+  console.log("--------------------data",req.body)
         // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
 
