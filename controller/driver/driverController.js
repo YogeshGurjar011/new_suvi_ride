@@ -986,77 +986,75 @@ const deleteDriver = async (req, res) => {
 }
 
 //Accept Ride Request 
-<<<<<<< HEAD
-const acceptRideRequest = async (req, res) => {
-    // Get token from header (Authorization)
-    const token = req.headers.authorization.split(' ')[1]
-    // Decode token to get Driver Id
-    const decodeToken = jwt.decode(token)
-    const driverId = decodeToken.driverId
-    const confirmOtp = req.body.confirmOtp
-    //const deviceToken = req.body.deviceToken;
-    const ride_id = req.body.ride_id
-    //const driverId = req.body.driverId
-    const findRideStatus = await rideModel.findOne({ _id: ride_id });
-    console.log(findRideStatus);
-    if (findRideStatus && findRideStatus.status == "requested") {
-        console.log('hello')
-        const filter = { _id: ride_id }
-        const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp }
-        const options = { new: true }
-        const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
-        if (rideAccepted) {
-            const driverFilter = { _id: driverId }
-            const driverUpdate = { isAvailable: false }
-            const option = { new: true }
-            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
-            const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
-                .populate({ path: 'vehicleType', select: ['name'] })
-                .populate({ path: 'currentRide', select: ['driverId'] });
-            if (findDriver) {
-                // const fullName = findDriver[0].drivingLicence.fullName;
-                // const profileImage = findDriver[0].selfie;
-                // const rating = findDriver[0].ratting;
-                // const vehicleType = findDriver[0].vehicleType;
-                // const deviceTokens = [deviceToken];
-                // const message = {
-                //     notification: {
-                //         title: 'New Message',
-                //         body: 'ride requested accpeted',
-                //     },
-                //     data: {
-                //         //     fullName: fullName,
-                //         //     profileImage: profileImage,
-                //         //     rating: rating.toString(),
-                //         //    // vehicleType: vehicleType
+// const acceptRideRequest = async (req, res) => {
+//     // Get token from header (Authorization)
+//     const token = req.headers.authorization.split(' ')[1]
+//     // Decode token to get Driver Id
+//     const decodeToken = jwt.decode(token)
+//     const driverId = decodeToken.driverId
+//     const confirmOtp = req.body.confirmOtp
+//     //const deviceToken = req.body.deviceToken;
+//     const ride_id = req.body.ride_id
+//     //const driverId = req.body.driverId
+//     const findRideStatus = await rideModel.findOne({ _id: ride_id });
+//     console.log(findRideStatus);
+//     if (findRideStatus && findRideStatus.status == "requested") {
+//         console.log('hello')
+//         const filter = { _id: ride_id }
+//         const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp }
+//         const options = { new: true }
+//         const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
+//         if (rideAccepted) {
+//             const driverFilter = { _id: driverId }
+//             const driverUpdate = { isAvailable: false }
+//             const option = { new: true }
+//             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+//             const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
+//                 .populate({ path: 'vehicleType', select: ['name'] })
+//                 .populate({ path: 'currentRide', select: ['driverId'] });
+//             if (findDriver) {
+//                 // const fullName = findDriver[0].drivingLicence.fullName;
+//                 // const profileImage = findDriver[0].selfie;
+//                 // const rating = findDriver[0].ratting;
+//                 // const vehicleType = findDriver[0].vehicleType;
+//                 // const deviceTokens = [deviceToken];
+//                 // const message = {
+//                 //     notification: {
+//                 //         title: 'New Message',
+//                 //         body: 'ride requested accpeted',
+//                 //     },
+//                 //     data: {
+//                 //         //     fullName: fullName,
+//                 //         //     profileImage: profileImage,
+//                 //         //     rating: rating.toString(),
+//                 //         //    // vehicleType: vehicleType
 
-                //     }
-                // };
-                // try {
-                // const response = await app2Messaging.sendToDevice(deviceTokens, message);
-                // console.log('Successfully sent message:', response);
-                res.status(200).send({
-                    success: true,
-                    //data:findDriver,
-                    fullName: findDriver.drivingLicence.fullName,
-                    selfie: findDriver.selfie,
-                    ratting: findDriver.ratting,
-                    registrationID: findDriver.vehiclesDetails.registrationID,
-                    pickupLocation: findRideStatus.pickupLocation,
-                    destinationLocation: findRideStatus.destinationLocation,
-                    paymentMethod: findRideStatus.paymentMethod,
-                    message: "Ride accepted successfully",
-                    nextScreen: 'Navigate to pickup point Screen'
-                });
-                // } catch (error) {
-                //     console.error('Error sending message:', error);
-                //     res.status(500).send({
-                //         success: false,
-                //         message: "Error sending push notification"
-                //     });
-                // }
-            }
-=======
+//                 //     }
+//                 // };
+//                 // try {
+//                 // const response = await app2Messaging.sendToDevice(deviceTokens, message);
+//                 // console.log('Successfully sent message:', response);
+//                 res.status(200).send({
+//                     success: true,
+//                     //data:findDriver,
+//                     fullName: findDriver.drivingLicence.fullName,
+//                     selfie: findDriver.selfie,
+//                     ratting: findDriver.ratting,
+//                     registrationID: findDriver.vehiclesDetails.registrationID,
+//                     pickupLocation: findRideStatus.pickupLocation,
+//                     destinationLocation: findRideStatus.destinationLocation,
+//                     paymentMethod: findRideStatus.paymentMethod,
+//                     message: "Ride accepted successfully",
+//                     nextScreen: 'Navigate to pickup point Screen'
+//                 });
+//                 // } catch (error) {
+//                 //     console.error('Error sending message:', error);
+//                 //     res.status(500).send({
+//                 //         success: false,
+//                 //         message: "Error sending push notification"
+//                 //     });
+//                 // }
+//             }
 
 const acceptRideRequest = async (req, res) => {
     try {
@@ -1104,7 +1102,6 @@ const acceptRideRequest = async (req, res) => {
               nextScreen: "Navigate to pickup point Screen",
             });
           }
->>>>>>> 1da60e57c6d578a2a260c19b54a1d1833c416f8b
         }
       } else if (findRideStatus && findRideStatus.status === "Accepted") {
         res.status(200).send({
