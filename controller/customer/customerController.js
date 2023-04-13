@@ -1513,6 +1513,7 @@ const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day:
     let rideData = {
       ride_id: savedRide._id,
       customer_id: customer._id,
+      customer_name: customer.fullName,
       pickupLocation: savedRide.pickupLocation,
       pickupLatitude: savedRide.pickupLatitude,
       pickupLongitude: savedRide.pickupLongitude,
@@ -1564,6 +1565,7 @@ const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day:
           data: {
             ride_id: rideData.ride_id.toString(),
             customer_id: rideData.customer_id.toString(),
+            customer_name: rideData.customer_name.toString(),
             pickupLocation: rideData.pickupLocation.toString(),
             pickupLatitude: rideData.pickupLatitude.toString(),
             pickupLongitude: rideData.pickupLongitude.toString(),
