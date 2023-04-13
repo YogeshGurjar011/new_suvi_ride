@@ -1056,32 +1056,6 @@ const deleteDriver = async (req, res) => {
 //                 // }
 //             }
 
-                //     }
-                // };
-                // try {
-                // const response = await app2Messaging.sendToDevice(deviceTokens, message);
-                // console.log('Successfully sent message:', response);
-                // res.status(200).send({
-                //     success: true,
-                //     //data:findDriver,
-                //     fullName: findDriver.drivingLicence.fullName,
-                //     selfie: findDriver.selfie,
-                //     ratting: findDriver.ratting,
-                //     registrationID: findDriver.vehiclesDetails.registrationID,
-                //     pickupLocation: findRideStatus.pickupLocation,
-                //     destinationLocation: findRideStatus.destinationLocation,
-                //     paymentMethod: findRideStatus.paymentMethod,
-                //     message: "Ride accepted successfully",
-                //     nextScreen: 'Navigate to pickup point Screen'
-                // });
-                // } catch (error) {
-                //     console.error('Error sending message:', error);
-                //     res.status(500).send({
-                //         success: false,
-                //         message: "Error sending push notification"
-                //     });
-                // }
-        
 const acceptRideRequest = async (req, res) => {
     try {
       // Get token from header (Authorization)
