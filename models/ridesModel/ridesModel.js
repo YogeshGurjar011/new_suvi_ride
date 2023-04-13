@@ -178,19 +178,19 @@ const customerRidesSchema = mongoose.Schema({
     ref: 'rattingModel'
   },
   createdAt: {
-    type: Date,
+    type: String,
     default: Date.now
   },
   updatedAt: {
-    type: Date,
+    type: String,
     default: Date.now
   },
   rideStartTime: {
-    type: Date,
+    type: String,
     default: null
   },
   rideEndTime: {
-    type: Date,
+    type: String,
     default: null
   },
   confirmOtp:{

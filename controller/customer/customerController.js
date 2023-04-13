@@ -1464,6 +1464,18 @@ const riderequest = async (req, res) => {
     // console.log(scheduledTime.getTime())
     // console.log( nearestDrivers)
     // console.log( nearestDrivers[0].driverId)
+    
+    // Get the current date and time in India Standard Time (IST)
+const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+
+// Get the month name from the current date in IST
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// Set the createdAt and rideStartTime fields
+const createdAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+// const rideStartTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+
     const ride = new customerRidesModel({
       customerId,
       driverId: null,
@@ -1481,6 +1493,8 @@ const riderequest = async (req, res) => {
       fare,
       distance: distanceInKm,
       duration: Math.round((distanceInKm / 30) * 60), // Assuming average speed of 30 km/hr, convert km to minutes
+      createdAt:createdAt,
+      updatedAt:updatedAt
     });
     const savedRide = await ride.save();
     const customer = await customerBasicDetailsModel.findById({ _id: savedRide.customerId })
@@ -1499,6 +1513,7 @@ const riderequest = async (req, res) => {
     let rideData = {
       ride_id: savedRide._id,
       customer_id: customer._id,
+      customer_name: customer.fullName,
       pickupLocation: savedRide.pickupLocation,
       pickupLatitude: savedRide.pickupLatitude,
       pickupLongitude: savedRide.pickupLongitude,
@@ -1550,6 +1565,7 @@ const riderequest = async (req, res) => {
           data: {
             ride_id: rideData.ride_id.toString(),
             customer_id: rideData.customer_id.toString(),
+            customer_name: rideData.customer_name.toString(),
             pickupLocation: rideData.pickupLocation.toString(),
             pickupLatitude: rideData.pickupLatitude.toString(),
             pickupLongitude: rideData.pickupLongitude.toString(),
