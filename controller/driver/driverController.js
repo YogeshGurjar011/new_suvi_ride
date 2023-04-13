@@ -1336,8 +1336,8 @@ const navigateToPickupPoint = async (req, res) => {
 // start ride 
 const startRide = async (req, res) => {
     try {
-        const _id = req.params._id;
-        const ride = await rideModel.findById(_id);
+        const rideId = req.body.rideId;
+        const ride = await rideModel.findById({_id:rideId});
         if (!ride) {
             return res.status(404).json({ success: false, message: 'Ride not found' });
         }
