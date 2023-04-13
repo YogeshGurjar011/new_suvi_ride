@@ -1539,8 +1539,8 @@ const riderequest = async (req, res) => {
         }
       };
       const sendFCM = async (driver) => {
-        const deviceToken = "eaDX6OsvSKyVCVxLOps6tO:APA91bG2Nutdj8P-3IbQriQ_33GSiQ3dVWVMs_uWxkn58gR0vnYbHAk-t_bpgmMOcVkNe3PYfvzZwXcj1Jvxe6_AaJzbBDYGB2HnAkRDJAUOWR4KnYX3sv_noE7xQpL8RZ4TEHSVB0kq";
-//         const deviceToken = fcmToken;
+//         const deviceToken = "eaDX6OsvSKyVCVxLOps6tO:APA91bG2Nutdj8P-3IbQriQ_33GSiQ3dVWVMs_uWxkn58gR0vnYbHAk-t_bpgmMOcVkNe3PYfvzZwXcj1Jvxe6_AaJzbBDYGB2HnAkRDJAUOWR4KnYX3sv_noE7xQpL8RZ4TEHSVB0kq";
+        const deviceToken = driver[0].deviceToken;
         const message = {
           notification: {
             title: 'New Ride Request',
