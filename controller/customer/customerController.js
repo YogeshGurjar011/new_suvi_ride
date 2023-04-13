@@ -1540,7 +1540,7 @@ const riderequest = async (req, res) => {
       };
       const sendFCM = async (driver) => {
 //         const deviceToken = "eaDX6OsvSKyVCVxLOps6tO:APA91bG2Nutdj8P-3IbQriQ_33GSiQ3dVWVMs_uWxkn58gR0vnYbHAk-t_bpgmMOcVkNe3PYfvzZwXcj1Jvxe6_AaJzbBDYGB2HnAkRDJAUOWR4KnYX3sv_noE7xQpL8RZ4TEHSVB0kq";
-        const deviceToken = driver[0].deviceToken;
+        const deviceToken = "dH8MvTsDSTOFskjAlR_6_a:APA91bFkPeuazDaH6069dyxMfEqjR2c4caPfRd31rQ9dFFZsvVDnEO6OqAOGHFiwtosVzlmhaa4I6D-ZS5r6p1kUDJbVWpx58tjUaf8bQdoQI4OPfsuJ53SshxqljpbKnek3JwdDRYcn";
         const message = {
           notification: {
             title: 'New Ride Request',
