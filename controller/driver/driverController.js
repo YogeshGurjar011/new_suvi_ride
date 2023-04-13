@@ -10,8 +10,8 @@ const writeToUsModel = require('../../models/writeToUsModel');
 
 const serviceAccount2 = require('../../middeleware_functions/suviridecustomer-firebase-adminsdk-77pfg-1ca6fd5288.json');
 const app2 = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount2),
-  databaseURL: 'https://suviridecustomer.firebaseio.com'
+    credential: admin.credential.cert(serviceAccount2),
+    databaseURL: 'https://suviridecustomer.firebaseio.com'
 }, 'app2');
 const app2Messaging = admin.messaging(app2);
 // Genrate OTP 
@@ -226,106 +226,106 @@ const app2Messaging = admin.messaging(app2);
 // Driver Login
 const driverLogin = async (req, res) => {
     try {
-      const { mobileNumber, language, deviceToken } = req.body;
-      if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
-        return res.status(400).send({
-          success: false,
-          successCode: 400,
-          message: "Please provide a valid mobile number in the format of +911234567890.",
-        });
-      }
-      if (!language) {
-        return res.status(400).send({
-          success: false,
-          successCode: 400,
-          message: "Please provide a valid language code.",
-        });
-      }
-      if (!deviceToken) {
-        return res.status(400).send({
-          success: false,
-          successCode: 400,
-          message: "Please provide a valid fcmToken.",
-        });
-      }
-      const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
-      if (!result) {
-        const newDriver = new driverBasicDetailsMOdel({
-          mobileNumber: mobileNumber,
-          language: language,
-          deviceToken: deviceToken,
-        });
-        const newDriverResult = await newDriver.save();
-        if (newDriverResult) {
-          res.status(200).send({
-            success: true,
-            message: "Mobile Number Verified",
-            nextScreen: "registration",
-          });
-        } else {
-          res.status(400).send({
-            success: false,
-            successCode: 400,
-            message: "Mobile Number Is Not Verified ",
-          });
+        const { mobileNumber, language, deviceToken } = req.body;
+        if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: "Please provide a valid mobile number in the format of +911234567890.",
+            });
         }
-      } else {
-        if (result.verificationStatus === "failed") {
-          res.status(200).send({
-            success: true,
-            message: "Driver With This Number Is Already Exits",
-            data: {
-              driverId:result._id,
-              mobileNumber: result.mobileNumber,
-              language: result.language,
-              fullName: result.drivingLicence.fullName,
-              gender: result.drivingLicence.gender,
-              selfie: result.selfie,
-              Status: result.Status,
-              token: result.token,
-             
-              // deviceToken: result.deviceToken
-            },
-            nextScreen: "registration",
-          });
-        } else {
-          // Update the user's deviceToken and token
-          const token = jwt.sign(
-            {
-              driverId: result._id,
-              language: result.language.name,
-              mobileNumber: result.mobileNumber,
-              fullName: result.drivingLicence.fullName,
-              verificationStatus: result.verificationStatus,
-              vehicleType: result.vehicleType,
-              currentLocation: result.currentLocation,
-              hasRide: result.hasRide,
-              currentRide: result.currentRide,
-              passengerCapacity: result.passengerCapacity,
-              Status: result.Status,
-            },
-            "secretKey"
-          );
-          result.token = token;
-          result.deviceToken = deviceToken;
-          const updateToken = await result.save();
-          res.status(200).send({
-            success: true,
-            successCode: 200,
-            message: "This Driver Is Already Registered",
-            data: updateToken,
-            nextScreen: "welcome",
-          });
+        if (!language) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: "Please provide a valid language code.",
+            });
         }
-      }
+        if (!deviceToken) {
+            return res.status(400).send({
+                success: false,
+                successCode: 400,
+                message: "Please provide a valid fcmToken.",
+            });
+        }
+        const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
+        if (!result) {
+            const newDriver = new driverBasicDetailsMOdel({
+                mobileNumber: mobileNumber,
+                language: language,
+                deviceToken: deviceToken,
+            });
+            const newDriverResult = await newDriver.save();
+            if (newDriverResult) {
+                res.status(200).send({
+                    success: true,
+                    message: "Mobile Number Verified",
+                    nextScreen: "registration",
+                });
+            } else {
+                res.status(400).send({
+                    success: false,
+                    successCode: 400,
+                    message: "Mobile Number Is Not Verified ",
+                });
+            }
+        } else {
+            if (result.verificationStatus === "failed") {
+                res.status(200).send({
+                    success: true,
+                    message: "Driver With This Number Is Already Exits",
+                    data: {
+                        driverId: result._id,
+                        mobileNumber: result.mobileNumber,
+                        language: result.language,
+                        fullName: result.drivingLicence.fullName,
+                        gender: result.drivingLicence.gender,
+                        selfie: result.selfie,
+                        Status: result.Status,
+                        token: result.token,
+
+                        // deviceToken: result.deviceToken
+                    },
+                    nextScreen: "registration",
+                });
+            } else {
+                // Update the user's deviceToken and token
+                const token = jwt.sign(
+                    {
+                        driverId: result._id,
+                        language: result.language.name,
+                        mobileNumber: result.mobileNumber,
+                        fullName: result.drivingLicence.fullName,
+                        verificationStatus: result.verificationStatus,
+                        vehicleType: result.vehicleType,
+                        currentLocation: result.currentLocation,
+                        hasRide: result.hasRide,
+                        currentRide: result.currentRide,
+                        passengerCapacity: result.passengerCapacity,
+                        Status: result.Status,
+                    },
+                    "secretKey"
+                );
+                result.token = token;
+                result.deviceToken = deviceToken;
+                const updateToken = await result.save();
+                res.status(200).send({
+                    success: true,
+                    successCode: 200,
+                    message: "This Driver Is Already Registered",
+                    data: updateToken,
+                    nextScreen: "welcome",
+                });
+            }
+        }
     } catch (error) {
-      console.log(error);
-      res.status(500).send({
-        success: false,
-        successCode: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            successCode: 500,
+            message: "Internal Server Error",
+            error: error.message,
+        });
     }
 };
 
@@ -378,15 +378,15 @@ const driverDrivingLicence = async (req, res) => {
         //     })
         // }
         const result = await driverBasicDetailsMOdel.find({ mobileNumber: mobileNumber })
-            //.populate({ path: 'language', select: ['name'] });;
+        //.populate({ path: 'language', select: ['name'] });;
         if (result) {
-            
+
             const filter = { mobileNumber: mobileNumber };
             const update = { $set: { 'drivingLicence.fullName': fullName, 'drivingLicence.address': address, 'drivingLicence.gender': gender, 'drivingLicence.licenceNumber': licenceNumber, 'drivingLicence.issuedDate': issuedDate, 'drivingLicence.validitiy': validitiy, 'drivingLicence.uploadImage': req.file.filename } };
             const options = { new: true };
             const result = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options)
-               // .populate({ path: 'language', select: ['name'] })
-            
+            // .populate({ path: 'language', select: ['name'] })
+
             console.log(result)
             if (result) {
                 const { _id, language, mobileNumber, otp, fullName, verificationStatus, vehicleType, currentLocation, hasRide, currentRide, passengerCapacity, Status } = result;
@@ -394,20 +394,20 @@ const driverDrivingLicence = async (req, res) => {
                     "secretKey",);
                 result.token = token
                 const updateToken = await result.save();
-                if(updateToken){
+                if (updateToken) {
                     res.status(200).send({
                         success: true,
                         //successCode: 200,
                         //data: result,
                         message: 'Driving Licence Added Successfully',
-                        nextFiled:"vehicle_detail",
+                        nextFiled: "vehicle_detail",
                         token
                     });
                 }
-                else{
+                else {
                     res.status(400).send({
-                        success:false,
-                        message:"not able to save token in database"
+                        success: false,
+                        message: "not able to save token in database"
                     })
                 }
             }
@@ -428,7 +428,7 @@ const driverDrivingLicence = async (req, res) => {
         }
 
     } catch (error) {
-         console.log(error)
+        console.log(error)
         res.status(500).send({
             success: false,
             message: 'Internal Server Error',
@@ -440,8 +440,8 @@ const driverDrivingLicence = async (req, res) => {
 // Registration  = Driver Vehicle Details
 const driverVehicleDetails = async (req, res) => {
     try {
-        const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity,vehicleType } = req.body;
-  console.log("--------------------data",req.body)
+        const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity, vehicleType } = req.body;
+        console.log("--------------------data", req.body)
         // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
 
@@ -481,7 +481,7 @@ const driverVehicleDetails = async (req, res) => {
             .populate({ path: 'language', select: ['name'] });;
         if (result) {
             const filter = { mobileNumber: mobileNumber };
-            const update = { $set: { 'vehiclesDetails.vehicleModelNumber': vehicleModelNumber, 'vehiclesDetails.registrationID': registrationID, 'vehiclesDetails.dateofRegistration': dateofRegistration, 'vehiclesDetails.registrationValidity': registrationValidity, 'vehiclesDetails.imageOfRegistrationCard': req.file.filename,vehicleType:vehicleType } };
+            const update = { $set: { 'vehiclesDetails.vehicleModelNumber': vehicleModelNumber, 'vehiclesDetails.registrationID': registrationID, 'vehiclesDetails.dateofRegistration': dateofRegistration, 'vehiclesDetails.registrationValidity': registrationValidity, 'vehiclesDetails.imageOfRegistrationCard': req.file.filename, vehicleType: vehicleType } };
             const options = { new: true };
             const results = await driverBasicDetailsMOdel.findOneAndUpdate(filter, update, options)
                 .populate({ path: 'language', select: ['name'] });;
@@ -491,7 +491,7 @@ const driverVehicleDetails = async (req, res) => {
                     //successCode: 200,
                     data: results,
                     message: 'Vehicle Details added Successfully',
-                    nextFiled:'take_selfie'
+                    nextFiled: 'take_selfie'
                 })
             }
             else {
@@ -554,10 +554,10 @@ const driverAddBankDetails = async (req, res) => {
             if (updatedResult) {
                 res.status(200).send({
                     success: true,
-                   // successCode: 200,
-                   // data: updatedResult,
+                    // successCode: 200,
+                    // data: updatedResult,
                     message: 'Bank Details added Successfully',
-                    nextFiled:"Take Selfie"
+                    nextFiled: "Take Selfie"
                 })
             }
             else {
@@ -653,8 +653,8 @@ const driverTakeSelfie = async (req, res) => {
                     // successCode: 200,
                     // data: results,
                     message: 'Selfie uploaded successfully',
-//                     nextFiled:"make_payment"
-                   nextFiled:"verification"
+                    //                     nextFiled:"make_payment"
+                    nextFiled: "verification"
                 })
             }
             else {
@@ -702,7 +702,7 @@ const driverDocumentsVerification = async (req, res) => {
             })
         }
         else {
-            const { verificationStatus, drivingLicence, vehiclesDetails} = result
+            const { verificationStatus, drivingLicence, vehiclesDetails } = result
             if (drivingLicence.verification !== 'verified') {
                 return res.status(400).send({
                     success: false,
@@ -730,7 +730,7 @@ const driverDocumentsVerification = async (req, res) => {
                 res.status(200).send({
                     success: true,
                     successCode: 200,
-                   // data: result,
+                    // data: result,
                     message: 'Registration successfull',
                     nextScreen: 'Home Screen'
                 })
@@ -820,19 +820,19 @@ const updateDriverStatus = async (req, res) => {
         if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
-       const id =  { _id }
-       const update =  {
+        const id = { _id }
+        const update = {
             $set: {
                 'Status': req.body.Status
             }
         }
         const options = { new: true }
-        const result = await driverBasicDetailsMOdel.findOneAndUpdate( id,update,options);
+        const result = await driverBasicDetailsMOdel.findOneAndUpdate(id, update, options);
         if (result) {
             res.status(200).send({
                 success: true,
                 //successCode: 200,
-                Status:result.Status,   
+                Status: result.Status,
                 message: 'driver status updated successfully'
             })
         }
@@ -898,13 +898,13 @@ const totalDrivers = (req, res) => {
 // update driver current location 
 const updateDriverCurrentLocation = async (req, res) => {
     try {
-         // Get token from header (Authorication)
+        // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
 
         // Decode token to get driver id
         const decodedToken = jwt.decode(token);
         const driverId = decodedToken.driverId;
-      
+
         const { driverlatitude, driverlongitude } = req.body;
 
         // Check if the latitude and longitude values are valid numbers
@@ -913,7 +913,7 @@ const updateDriverCurrentLocation = async (req, res) => {
         }
 
         // Find the driver by ID
-        const driver = await driverBasicDetailsMOdel.findById({_id:driverId});
+        const driver = await driverBasicDetailsMOdel.findById({ _id: driverId });
 
         if (!driver) {
             return res.status(404).json({
@@ -941,8 +941,8 @@ const updateDriverCurrentLocation = async (req, res) => {
         const updatedDriver = await driver.save();
 
         res.status(200).send({
-            success:true,
-            message:"Current Location Updated Successfully"
+            success: true,
+            message: "Current Location Updated Successfully"
         })
     } catch (error) {
         res.status(500).json({
@@ -1001,13 +1001,13 @@ const acceptRideRequest = async (req, res) => {
     if (findRideStatus && findRideStatus.status == "requested") {
         console.log('hello')
         const filter = { _id: ride_id }
-        const update = { status: "Accepted", driverId: driverId ,confirmOtp:confirmOtp}
+        const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp }
         const options = { new: true }
         const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
         if (rideAccepted) {
             const driverFilter = { _id: driverId }
             const driverUpdate = { isAvailable: false }
-            const option = {new :true}
+            const option = { new: true }
             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
             const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
                 .populate({ path: 'vehicleType', select: ['name'] })
@@ -1032,21 +1032,21 @@ const acceptRideRequest = async (req, res) => {
                 //     }
                 // };
                 // try {
-                    // const response = await app2Messaging.sendToDevice(deviceTokens, message);
-                    // console.log('Successfully sent message:', response);
-                    res.status(200).send({
-                        success: true,
-                        //data:findDriver,
-                        fullName: findDriver.drivingLicence.fullName,
-                        selfie: findDriver.selfie,
-                        ratting: findDriver.ratting,
-                        registrationID: findDriver.vehiclesDetails.registrationID,
-                        pickupLocation: findRideStatus.pickupLocation,
-                        destinationLocation: findRideStatus.destinationLocation,
-                        paymentMethod: findRideStatus.paymentMethod,
-                        message: "Ride accepted successfully",
-                        nextScreen: 'Navigate to pickup point Screen'
-                    });
+                // const response = await app2Messaging.sendToDevice(deviceTokens, message);
+                // console.log('Successfully sent message:', response);
+                res.status(200).send({
+                    success: true,
+                    //data:findDriver,
+                    fullName: findDriver.drivingLicence.fullName,
+                    selfie: findDriver.selfie,
+                    ratting: findDriver.ratting,
+                    registrationID: findDriver.vehiclesDetails.registrationID,
+                    pickupLocation: findRideStatus.pickupLocation,
+                    destinationLocation: findRideStatus.destinationLocation,
+                    paymentMethod: findRideStatus.paymentMethod,
+                    message: "Ride accepted successfully",
+                    nextScreen: 'Navigate to pickup point Screen'
+                });
                 // } catch (error) {
                 //     console.error('Error sending message:', error);
                 //     res.status(500).send({
@@ -1218,7 +1218,7 @@ const reachedToDestination = async (req, res) => {
         const destinationLongitude = req.body.destinationLongitude;
         const latitude = req.body.latitude;
         const longitude = req.body.longitude;
-        const currentLocation = {latitude,longitude};
+        const currentLocation = { latitude, longitude };
         const distanceThreshold = 100; // threshold distance in meters
         const averageDrivingSpeed = 30; // average driving speed in km/h
 
@@ -1234,7 +1234,7 @@ const reachedToDestination = async (req, res) => {
                 message: "You have reached the destination location!",
                 nextScreen: "Make Payment Screen"
             });
-        } else {    
+        } else {
             res.status(200).send({
                 success: true,
                 message: `You are still ${Math.round(timeInMinutes)} minute(s) away from the destination location!.`
@@ -1289,8 +1289,8 @@ const endRide = async (req, res) => {
         // const perMileRate = 1.5; // Set your per-mile rate here
         // const fare = baseFare + (perMileRate * distanceTraveled);
         // Update the ride status and fare
-        const filter = {_id}
-        const update = { status: "Completed"};
+        const filter = { _id }
+        const update = { status: "Completed" };
         const options = { new: true };
         const rideEnded = await rideModel.findByIdAndUpdate(filter, update, options);
         if (rideEnded) {
@@ -1397,53 +1397,122 @@ const driverRatting = async (req, res) => {
 // Total earning 
 const totalEarning = async (req, res) => {
     try {
-      const token = req.headers.authorization.split(' ')[1];
-      const decodedToken = jwt.decode(token);
-      const driverId = decodedToken.driverId;
-      const findCompletedRides = await rideModel
-        .find({ driverId, status: "Completed" })
-        .populate({ path: "customerId", select: ["fullName", "profileImage"] })
-        .select({
-            pickupLocation: 1,
-            destinationLocation: 1,
-            paymentMethod: 1,
-            fare: 1,
-            distance: 1,
-        });
-  
-      if (findCompletedRides.length > 0) {
-        const totalEarning = findCompletedRides.reduce(
-          (acc, ride) => acc + ride.fare,
-          0
-        );
-        res.status(200).send({
-          success: true,
-          message: "Total Earnings",
-          totalEarning,
-          totalRides: findCompletedRides.map((ride) => ({
-            pickupLocation: ride.pickupLocation,
-            destinationLocation: ride.destinationLocation,
-            paymentMethod: ride.paymentMethod,
-            fare: ride.fare,
-            distance: ride.distance,
-            customerId: ride.customerId,
-          })),
-        });
-      } else {
-        res.status(404).send({
-          success: false,
-          message: "No completed rides found",
-        });
-      }
-    } catch (error) {
-      res.status(500).send({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
-    }
-  };
+        const token = req.headers.authorization.split(' ')[1];
+        const decodedToken = jwt.decode(token);
+        const driverId = decodedToken.driverId;
+        const findCompletedRides = await rideModel
+            .find({ driverId, status: "Completed" })
+            .populate({ path: "customerId", select: ["fullName", "profileImage"] })
+            .select({
+                pickupLocation: 1,
+                destinationLocation: 1,
+                paymentMethod: 1,
+                fare: 1,
+                distance: 1,
+            });
 
+        if (findCompletedRides.length > 0) {
+            const totalEarning = findCompletedRides.reduce(
+                (acc, ride) => acc + ride.fare,
+                0
+            );
+            res.status(200).send({
+                success: true,
+                message: "Total Earnings",
+                totalEarning,
+                totalRides: findCompletedRides.map((ride) => ({
+                    pickupLocation: ride.pickupLocation,
+                    destinationLocation: ride.destinationLocation,
+                    paymentMethod: ride.paymentMethod,
+                    fare: ride.fare,
+                    distance: ride.distance,
+                    customerId: ride.customerId,
+                })),
+            });
+        } else {
+            res.status(404).send({
+                success: false,
+                message: "No completed rides found",
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+// get ongoing ride of driver
+const getOngoingRide = async(req,res)=>{
+    try {
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1]
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token)
+        const driverId = decodeToken.driverId
+        const findRides = await rideModel
+            .find({ driverId: driverId, status: "Ongoing" })
+           // .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+            //.populate({ path: 'driverId', select: ['fullName', 'profileImage'] })
+            // .populate({ path: 'vehicleType', select: ['name'] })
+            .select({
+                customerId:1,
+                _id:1,
+                pickupLocation: 1,
+                pickupLatitude: 1,
+                pickupLongitude:1,
+                destinationLocation: 1,
+                destinationLatitude:1,
+                destinationLongitude:1,
+                numberOfPassengers:1,
+                fare: 1,
+                distance: 1,
+                paymentMethod: 1,
+                status:1,
+                
+                // rideStartTime:1
+            });
+
+            if (findRides.length) {
+                const ride = findRides[0]; // use the first element of the array
+                res.status(200).send({
+                    success: true,
+                    Ongoing: true,
+                    message: 'Ongoing Ride',
+                    ride: {
+                        customerId:ride.customerId,
+                        rideId:ride._id,
+                        pickupLocation:ride.pickupLocation,
+                        pickupLatitude:ride.pickupLatitude,
+                        pickupLongitude:ride.pickupLongitude,
+                        destinationLocation:ride.destinationLocation,
+                        destinationLatitude:ride.destinationLatitude,
+                        destinationLongitude:ride.destinationLongitude,
+                        numberOfPassengers:ride.numberOfPassengers,
+                        fare:ride.fare,
+                        distance:ride.distance,
+                        paymentMethod:ride.paymentMethod,
+                        status:ride.status,
+
+                    }
+                });
+        } else {
+            res.status(404).send({
+                success: false,
+                Ongoing: false,
+                message: 'Driver does not have any Ongoing ride',
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+}
 
 //   get all compeleted and decline rides 
 const getAllRides = async (req, res) => {
@@ -1466,20 +1535,20 @@ const getAllRides = async (req, res) => {
                 destinationLocation: 1,
                 paymentMethod: 1,
                 fare: 1,
-                distance:1
+                distance: 1
             });
 
         if (findRides) {
             res.status(200).send({
                 success: true,
                 message: 'All Rides',
-                Rides: findRides.map((ride)=>({
-                    pickupLocation:ride.pickupLocation,
-                    destinationLocation:ride.destinationLocation,
-                    paymentMethod:ride.paymentMethod,
-                    fare:ride.fare,
-                    distance:ride.distance,
-                    customerId:ride.customerId
+                Rides: findRides.map((ride) => ({
+                    pickupLocation: ride.pickupLocation,
+                    destinationLocation: ride.destinationLocation,
+                    paymentMethod: ride.paymentMethod,
+                    fare: ride.fare,
+                    distance: ride.distance,
+                    customerId: ride.customerId
                 }))
             });
         } else {
@@ -1572,7 +1641,6 @@ const getTotalRides = async (req, res) => {
     }
 };
 
-
 // Driver Update Personal Details
 const updatePersonalDetails = async (req, res) => {
     try {
@@ -1610,10 +1678,10 @@ const updatePersonalDetails = async (req, res) => {
             if (mobileNumber) {
                 update.mobileNumber = mobileNumber;
             }
-            if(fullName) {
+            if (fullName) {
                 update['drivingLicence.fullName'] = fullName;
             }
-            if(address) {
+            if (address) {
                 update['drivingLicence.address'] = address;
             }
             const options = { new: true }
@@ -1652,7 +1720,6 @@ const updatePersonalDetails = async (req, res) => {
         })
     }
 }
-
 
 // Write to Us
 const writeToUs = async (req, res) => {
@@ -1705,44 +1772,43 @@ const writeToUs = async (req, res) => {
 // Logout Driver
 const driverLogout = async (req, res) => {
     try {
-      // Get token from header (Authorication)
-      const token = req.headers.authorization.split(' ')[1];
+        // Get token from header (Authorication)
+        const token = req.headers.authorization.split(' ')[1];
 
-      // Decode token to get driver id
-      const decodedToken = jwt.decode(token);
-      const mobileNumber = decodedToken.mobileNumber;
-     // const { mobileNumber } = req.body;
-      const driver = await driverBasicDetailsMOdel.findOne({ mobileNumber });
-  
-      if (!driver) {
-        return res.status(404).json({
-          success: false,
-          successCode: 404,
-          message: 'Driver not found',
+        // Decode token to get driver id
+        const decodedToken = jwt.decode(token);
+        const mobileNumber = decodedToken.mobileNumber;
+        // const { mobileNumber } = req.body;
+        const driver = await driverBasicDetailsMOdel.findOne({ mobileNumber });
+
+        if (!driver) {
+            return res.status(404).json({
+                success: false,
+                successCode: 404,
+                message: 'Driver not found',
+            });
+        }
+
+        // Update driver status to offline
+        driver.Status = 'offline';
+        driver.token = null;
+        driver.deviceToken = null;
+        await driver.save();
+
+        return res.status(200).json({
+            success: true,
+            successCode: 200,
+            message: 'Logout successful',
         });
-      }
-  
-      // Update driver status to offline
-      driver.Status = 'offline';
-      driver.token = null;
-      driver.deviceToken = null;
-      await driver.save();
-  
-      return res.status(200).json({
-        success: true,
-        successCode: 200,
-        message: 'Logout successful',
-      });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        successCode: 500,
-        error: error.message,
-        message: 'Internal server error',
-      });
+        return res.status(500).json({
+            success: false,
+            successCode: 500,
+            error: error.message,
+            message: 'Internal server error',
+        });
     }
-  };
-
+};
 
 // const driverAddBankDetails = async (req, res) => {
 //     try {
@@ -1792,72 +1858,72 @@ const driverLogout = async (req, res) => {
 // new get tota ries with different status
 const getTotalRidesWithStatus = async (req, res) => {
     try {
-      // Get token from header (Authorization)
-      const token = req.headers.authorization.split(' ')[1];
-      // Decode token to get Driver Id
-      const decodeToken = jwt.decode(token);
-      const driverId = decodeToken.driverId;
-  
-      const findRides = await rideModel
-        .find({ driverId: driverId, status: { $in: ["Completed", "Ongoing", "Decline"] } })
-        .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
-        .select({
-          pickupLocation: 1,
-          destinationLocation: 1,
-          paymentMethod: 1,
-          fare: 1,
-          distance: 1,
-          status: 1,
-          _id: 0,
-          customerId: 1
-        });
-  
-      if (findRides) {
-        const totalRides = [
-          { status: "Completed", data: [] },
-          { status: "Ongoing", data: [] },
-          { status: "Decline", data: [] }
-        ];
-  
-        findRides.forEach((ride) => {
-          const rideData = {
-            pickupLocation: ride.pickupLocation,
-            destinationLocation: ride.destinationLocation,
-            paymentMethod: ride.paymentMethod,
-            fare: ride.fare,
-            distance: ride.distance,
-            customerId: ride.customerId._id,
-            customerName: ride.customerId.fullName
-          };
-  
-          if (ride.status === "Completed") {
-            totalRides[0].data.push(rideData);
-          } else if (ride.status === "Ongoing") {
-            totalRides[1].data.push(rideData);
-          } else if (ride.status === "Decline") {
-            totalRides[2].data.push(rideData);
-          }
-        });
-  
-        res.status(200).send({
-          success: true,
-          message: 'All Rides',
-          rides: totalRides,
-        });
-      } else {
-        res.status(404).send({
-          success: false,
-          message: 'Not able to find rides for this driver',
-        });
-      }
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1];
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token);
+        const driverId = decodeToken.driverId;
+
+        const findRides = await rideModel
+            .find({ driverId: driverId, status: { $in: ["Completed", "Ongoing", "Decline"] } })
+            .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+            .select({
+                pickupLocation: 1,
+                destinationLocation: 1,
+                paymentMethod: 1,
+                fare: 1,
+                distance: 1,
+                status: 1,
+                _id: 0,
+                customerId: 1
+            });
+
+        if (findRides) {
+            const totalRides = [
+                { status: "Completed", data: [] },
+                { status: "Ongoing", data: [] },
+                { status: "Decline", data: [] }
+            ];
+
+            findRides.forEach((ride) => {
+                const rideData = {
+                    pickupLocation: ride.pickupLocation,
+                    destinationLocation: ride.destinationLocation,
+                    paymentMethod: ride.paymentMethod,
+                    fare: ride.fare,
+                    distance: ride.distance,
+                    customerId: ride.customerId._id,
+                    customerName: ride.customerId.fullName
+                };
+
+                if (ride.status === "Completed") {
+                    totalRides[0].data.push(rideData);
+                } else if (ride.status === "Ongoing") {
+                    totalRides[1].data.push(rideData);
+                } else if (ride.status === "Decline") {
+                    totalRides[2].data.push(rideData);
+                }
+            });
+
+            res.status(200).send({
+                success: true,
+                message: 'All Rides',
+                rides: totalRides,
+            });
+        } else {
+            res.status(404).send({
+                success: false,
+                message: 'Not able to find rides for this driver',
+            });
+        }
     } catch (error) {
-      res.status(500).send({
-        success: false,
-        message: 'Internal server error',
-        error: error.message,
-      });
+        res.status(500).send({
+            success: false,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
-  };
+};
 
 
 
@@ -1866,7 +1932,7 @@ module.exports = {
     driverLogin,
     driverDrivingLicence, driverVehicleDetails, driverAddBankDetails, driverTakeSelfie,
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
-    totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout,updatePersonalDetails,
-    driverRatting,acceptRideRequest,declineRideRequest,navigateToPickupPoint,startRide,reachedToDestination,
-    endRide,totalEarning,getAllRides,writeToUs,getTotalRides,getTotalRidesWithStatus
+    totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout, updatePersonalDetails,
+    driverRatting, acceptRideRequest, declineRideRequest, navigateToPickupPoint, startRide, reachedToDestination,
+    endRide, totalEarning, getAllRides, writeToUs, getTotalRides, getTotalRidesWithStatus,getOngoingRide
 }

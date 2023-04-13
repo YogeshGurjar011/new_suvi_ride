@@ -67,6 +67,8 @@ router.post('/driver/driverRatting',driverValidation,driverController.driverRatt
 
 router.get('/driver/totalEarning',driverValidation,driverController.totalEarning);
 
+router.get('/driver/getOngoingRide',driverValidation,driverController.getOngoingRide);
+
 router.post('/driver/getAllRides',driverValidation,driverController.getAllRides);
 
 router.get('/driver/getTotalRides',driverValidation,driverController.getTotalRides);
