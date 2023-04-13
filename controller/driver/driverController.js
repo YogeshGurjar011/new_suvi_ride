@@ -986,133 +986,247 @@ const deleteDriver = async (req, res) => {
 }
 
 //Accept Ride Request 
-const acceptRideRequest = async (req, res) => {
-    // Get token from header (Authorization)
-    const token = req.headers.authorization.split(' ')[1]
-    // Decode token to get Driver Id
-    const decodeToken = jwt.decode(token)
-    const driverId = decodeToken.driverId
-    const confirmOtp = req.body.confirmOtp
-    //const deviceToken = req.body.deviceToken;
-    const ride_id = req.body.ride_id
-    //const driverId = req.body.driverId
-    const findRideStatus = await rideModel.findOne({ _id: ride_id });
-    console.log(findRideStatus);
-    if (findRideStatus && findRideStatus.status == "requested") {
-        console.log('hello')
-        const filter = { _id: ride_id }
-        const update = { status: "Accepted", driverId: driverId ,confirmOtp:confirmOtp}
-        const options = { new: true }
-        const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
-        if (rideAccepted) {
-            const driverFilter = { _id: driverId }
-            const driverUpdate = { isAvailable: false }
-            const option = {new :true}
-            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
-            const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
-                .populate({ path: 'vehicleType', select: ['name'] })
-                .populate({ path: 'currentRide', select: ['driverId'] });
-            if (findDriver) {
-                // const fullName = findDriver[0].drivingLicence.fullName;
-                // const profileImage = findDriver[0].selfie;
-                // const rating = findDriver[0].ratting;
-                // const vehicleType = findDriver[0].vehicleType;
-                // const deviceTokens = [deviceToken];
-                // const message = {
-                //     notification: {
-                //         title: 'New Message',
-                //         body: 'ride requested accpeted',
-                //     },
-                //     data: {
-                //         //     fullName: fullName,
-                //         //     profileImage: profileImage,
-                //         //     rating: rating.toString(),
-                //         //    // vehicleType: vehicleType
 
-                //     }
-                // };
-                // try {
-                    // const response = await app2Messaging.sendToDevice(deviceTokens, message);
-                    // console.log('Successfully sent message:', response);
-                    res.status(200).send({
-                        success: true,
-                        //data:findDriver,
-                        fullName: findDriver.drivingLicence.fullName,
-                        selfie: findDriver.selfie,
-                        ratting: findDriver.ratting,
-                        registrationID: findDriver.vehiclesDetails.registrationID,
-                        pickupLocation: findRideStatus.pickupLocation,
-                        destinationLocation: findRideStatus.destinationLocation,
-                        paymentMethod: findRideStatus.paymentMethod,
-                        message: "Ride accepted successfully",
-                        nextScreen: 'Navigate to pickup point Screen'
-                    });
-                // } catch (error) {
-                //     console.error('Error sending message:', error);
-                //     res.status(500).send({
-                //         success: false,
-                //         message: "Error sending push notification"
-                //     });
-                // }
-            }
+const acceptRideRequest = async (req, res) => {
+    try {
+      // Get token from header (Authorization)
+      const token = req.headers.authorization.split(' ')[1];
+  
+      // Decode token to get Driver Id
+      const decodeToken = jwt.decode(token);
+      const driverId = decodeToken.driverId;
+  
+      // Generate confirmation OTP
+      const confirmOtp = Math.floor(1000 + Math.random() * 9000);
+  
+      const ride_id = req.body.ride_id;
+      const findRideStatus = await rideModel.findOne({ _id: ride_id });
+  
+      if (findRideStatus && findRideStatus.status === "requested") {
+        const filter = { _id: ride_id };
+        const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp };
+        const options = { new: true };
+        const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
+  
+        if (rideAccepted) {
+          const driverFilter = { _id: driverId };
+          const driverUpdate = { isAvailable: false };
+          const option = { new: true };
+          await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, option);
+  
+          const findDriver = await driverBasicDetailsMOdel
+            .findOne({ _id: driverId })
+            .populate({ path: "vehicleType", select: ["name"] })
+            .populate({ path: "currentRide", select: ["driverId"] });
+  
+          if (findDriver) {
+            res.status(200).send({
+              success: true,
+              fullName: findDriver.drivingLicence.fullName,
+              selfie: findDriver.selfie,
+              ratting: findDriver.ratting,
+              registrationID: findDriver.vehiclesDetails.registrationID,
+              pickupLocation: findRideStatus.pickupLocation,
+              destinationLocation: findRideStatus.destinationLocation,
+              paymentMethod: findRideStatus.paymentMethod,
+              message: "Ride accepted successfully",
+              nextScreen: "Navigate to pickup point Screen",
+            });
+          }
         }
-    } else if (findRideStatus && findRideStatus.status == "Accepted") {
+      } else if (findRideStatus && findRideStatus.status === "Accepted") {
         res.status(200).send({
-            success: false,
-            message: "This ride has already been accepted by another driver. Please wait for a new ride request.",
-            nextScreen: 'Home Screen'
+          success: false,
+          message: "This ride has already been accepted by another driver. Please wait for a new ride request.",
+          nextScreen: "Home Screen",
         });
-    }
-    else {
+      } else {
         res.status(404).send({
-            success: false,
-            message: "Ride not found"
+          success: false,
+          message: "Ride not found",
         });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({
+        success: false,
+        message: "Something went wrong. Please try again later.",
+      });
     }
-}
+  };
+
+// const acceptRideRequest = async (req, res) => {
+//     // Get token from header (Authorization)
+//     const token = req.headers.authorization.split(' ')[1]
+//     // Decode token to get Driver Id
+//     const decodeToken = jwt.decode(token)
+//     const driverId = decodeToken.driverId
+//     const confirmOtp = req.body.confirmOtp
+//     //const deviceToken = req.body.deviceToken;
+//     const ride_id = req.body.ride_id
+//     //const driverId = req.body.driverId
+//     const findRideStatus = await rideModel.findOne({ _id: ride_id });
+//     console.log(findRideStatus);
+//     if (findRideStatus && findRideStatus.status == "requested") {
+//         console.log('hello')
+//         const filter = { _id: ride_id }
+//         const update = { status: "Accepted", driverId: driverId ,confirmOtp:confirmOtp}
+//         const options = { new: true }
+//         const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
+//         if (rideAccepted) {
+//             const driverFilter = { _id: driverId }
+//             const driverUpdate = { isAvailable: false }
+//             const option = {new :true}
+//             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+//             const findDriver = await driverBasicDetailsMOdel.findOne({ _id: driverId })
+//                 .populate({ path: 'vehicleType', select: ['name'] })
+//                 .populate({ path: 'currentRide', select: ['driverId'] });
+//             if (findDriver) {
+//                 // const fullName = findDriver[0].drivingLicence.fullName;
+//                 // const profileImage = findDriver[0].selfie;
+//                 // const rating = findDriver[0].ratting;
+//                 // const vehicleType = findDriver[0].vehicleType;
+//                 // const deviceTokens = [deviceToken];
+//                 // const message = {
+//                 //     notification: {
+//                 //         title: 'New Message',
+//                 //         body: 'ride requested accpeted',
+//                 //     },
+//                 //     data: {
+//                 //         //     fullName: fullName,
+//                 //         //     profileImage: profileImage,
+//                 //         //     rating: rating.toString(),
+//                 //         //    // vehicleType: vehicleType
+
+//                 //     }
+//                 // };
+//                 // try {
+//                     // const response = await app2Messaging.sendToDevice(deviceTokens, message);
+//                     // console.log('Successfully sent message:', response);
+//                     res.status(200).send({
+//                         success: true,
+//                         //data:findDriver,
+//                         fullName: findDriver.drivingLicence.fullName,
+//                         selfie: findDriver.selfie,
+//                         ratting: findDriver.ratting,
+//                         registrationID: findDriver.vehiclesDetails.registrationID,
+//                         pickupLocation: findRideStatus.pickupLocation,
+//                         destinationLocation: findRideStatus.destinationLocation,
+//                         paymentMethod: findRideStatus.paymentMethod,
+//                         message: "Ride accepted successfully",
+//                         nextScreen: 'Navigate to pickup point Screen'
+//                     });
+//                 // } catch (error) {
+//                 //     console.error('Error sending message:', error);
+//                 //     res.status(500).send({
+//                 //         success: false,
+//                 //         message: "Error sending push notification"
+//                 //     });
+//                 // }
+//             }
+//         }
+//     } else if (findRideStatus && findRideStatus.status == "Accepted") {
+//         res.status(200).send({
+//             success: false,
+//             message: "This ride has already been accepted by another driver. Please wait for a new ride request.",
+//             nextScreen: 'Home Screen'
+//         });
+//     }
+//     else {
+//         res.status(404).send({
+//             success: false,
+//             message: "Ride not found"
+//         });
+//     }
+// }
 
 
 // Decline Ride Request
-const declineRideRequest = async (req, res) => {
-    // Get token from header (Authorization)
-    const token = req.headers.authorization.split(' ')[1]
-    // Decode token to get Driver Id
-    const decodeToken = jwt.decode(token)
-    const driverId = decodeToken.driverId
 
-    console.log(driverId)
-    const ride_id = req.body.ride_id
-    // const driverId = req.body.driverId
-    const findRideStatus = await rideModel.findOne({ _id: ride_id });
-    console.log(findRideStatus)
-    console.log(findRideStatus);
-    if (findRideStatus && findRideStatus.status == "requested") {
-        const filter = { _id: ride_id }
-        const update = { status: "Decline", driverId: driverId }
-        const options = { new: true }
+const declineRideRequest = async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decodeToken = jwt.decode(token);
+      const driverId = decodeToken.driverId;
+  
+      const rideId = req.body.ride_id;
+      const findRideStatus = await rideModel.findOne({ _id: rideId });
+  
+      if (findRideStatus && findRideStatus.status === 'requested') {
+        const filter = { _id: rideId };
+        const update = { status: 'Decline', driverId };
+        const options = { new: true };
         const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
+  
         if (rideDeclined) {
-            const driverFilter = { _id: driverId }
-            const driverUpdate = { hasRide: false }
-            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
-            res.status(200).send({
-                success: true,
-                message: 'Ride request declined',
-                nextScreen: 'Home screen'
-            })
+          const driverFilter = { _id: driverId };
+          const driverUpdate = { hasRide: false };
+          await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+          res.status(200).send({
+            success: true,
+            message: 'Ride request declined',
+            nextScreen: 'Home screen',
+          });
         } else {
-            res.status(400).send({
-                success: false,
-                message: 'Ride not found'
-            })
-        }
-    } else {
-        res.status(400).send({
+          res.status(400).send({
             success: false,
-            message: 'Invalid ride status'
-        })
+            message: 'Ride not found',
+          });
+        }
+      } else {
+        res.status(400).send({
+          success: false,
+          message: 'Invalid ride status',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({
+        success: false,
+        message: 'Server Error',
+      });
     }
-}
+  };
+// const declineRideRequest = async (req, res) => {
+//     // Get token from header (Authorization)
+//     const token = req.headers.authorization.split(' ')[1]
+//     // Decode token to get Driver Id
+//     const decodeToken = jwt.decode(token)
+//     const driverId = decodeToken.driverId
+
+//     console.log(driverId)
+//     const ride_id = req.body.ride_id
+//     // const driverId = req.body.driverId
+//     const findRideStatus = await rideModel.findOne({ _id: ride_id });
+//     console.log(findRideStatus)
+//     console.log(findRideStatus);
+//     if (findRideStatus && findRideStatus.status == "requested") {
+//         const filter = { _id: ride_id }
+//         const update = { status: "Decline", driverId: driverId }
+//         const options = { new: true }
+//         const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
+//         if (rideDeclined) {
+//             const driverFilter = { _id: driverId }
+//             const driverUpdate = { hasRide: false }
+//             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+//             res.status(200).send({
+//                 success: true,
+//                 message: 'Ride request declined',
+//                 nextScreen: 'Home screen'
+//             })
+//         } else {
+//             res.status(400).send({
+//                 success: false,
+//                 message: 'Ride not found'
+//             })
+//         }
+//     } else {
+//         res.status(400).send({
+//             success: false,
+//             message: 'Invalid ride status'
+//         })
+//     }
+// }
 
 // Navigate to pickup location
 const navigateToPickupPoint = async (req, res) => {
