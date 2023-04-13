@@ -314,7 +314,7 @@ const driverLogin = async (req, res) => {
                     successCode: 200,
                     message: "This Driver Is Already Registered",
                     data: updateToken,
-                    nextScreen: "welcome",
+                    nextScreen: "home_screen",
                 });
             }
         }
