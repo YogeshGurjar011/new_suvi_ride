@@ -1497,8 +1497,18 @@ const startRide = async (req, res) => {
         if (ride.status !== 'Accepted') {
             return res.status(400).json({ success: false, message: 'Cannot start ride in current status' });
         }
+               const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+
+// Get the month name from the current date in IST
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// Set the createdAt and rideStartTime fields
+const rideStartTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+
         ride.status = 'Ongoing';
-        ride.rideStartTime = Date.now(); // optional: update start time
+        ride.rideStartTime = rideStartTime; // optional: update start time
+        ride.updatedAt = updatedAt;
         await ride.save();
 
         // Convert UTC date to local timezone and format it
@@ -2361,7 +2371,7 @@ const acceptRideRequest = async (req, res) => {
 
         // Set the createdAt and rideStartTime fields
         const rideStartTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
-        const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+        const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
 
 
         if (findRideStatus && (findRideStatus.status === "requested" || findRideStatus.status === "Decline")) {
@@ -2435,7 +2445,7 @@ const declineRideRequest = async (req, res) => {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
         // Set the updatedAt  fields
-        const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+        const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
 
 
         if (findRideStatus && findRideStatus.status === 'requested') {
