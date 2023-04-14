@@ -1456,14 +1456,17 @@ const navigateToPickupPoint = async (req, res) => {
 const enterOtp = async(req,res)=>{
     try {
         const rideId = req.body.rideId
-        const findRide = await rideModel.find({_id:rideId});
+        const findRide = await rideModel.find({_id:rideId})
+        .select({
+            destinationLocation: 1,
+            destinationLatitude: 1,
+            destinationLongitude: 1,
+        });
         if(findRide){
             res.status(200).send({
                 success:true,
                 message:"Destination Location",
-                destinationLocation:findRide.destinationLocation,
-                destinationLatitude:findRide.destinationLatitude,
-                destinationLongitude:findRide.destinationLongitude
+                destinationLocation:findRide
             })
         }
         else{
