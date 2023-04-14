@@ -351,8 +351,8 @@ const driverLogin = async (req, res) => {
           message: "Please provide a valid fcmToken.",
         });
       }
-      const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
-      if (!result) {
+      const result = await driverBasicDetailsMOdel.find({ mobileNumber });
+      if (!result.length[0]) {
         const newDriver = new driverBasicDetailsMOdel({
           mobileNumber: mobileNumber,
           language: language,
