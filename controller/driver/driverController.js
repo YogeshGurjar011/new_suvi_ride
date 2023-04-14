@@ -287,7 +287,8 @@ const driverLogin = async (req, res) => {
                         // deviceToken: result.deviceToken
                     },
 //                     nextScreen: "registration",
-                    nextScreen:"verification"
+                    nextScreen:"verification",
+                    nextField: "registration"
                 });
             } else {
                 // Update the user's deviceToken and token
