@@ -360,12 +360,20 @@ const driverLogin = async (req, res) => {
           language: language,
           deviceToken: deviceToken,
         });
-        await newDriver.save();
+        const newDriverResult = await newDriver.save();
+        if (newDriverResult) {
           res.status(200).send({
             success: true,
             message: "Mobile Number Verified",
             nextScreen: "registration",
-          })
+          });
+        } else {
+          res.status(400).send({
+            success: false,
+            successCode: 400,
+            message: "Mobile Number Is Not Verified ",
+          });
+        }
       } else {
         if (result.verificationStatus === "failed") {
           res.status(200).send({
