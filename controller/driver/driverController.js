@@ -1772,7 +1772,7 @@ const getOngoingRide = async (req, res) => {
                 distance: 1,
                 paymentMethod: 1,
                 status: 1,
-                confirmOtp
+                confirmOtp: 1
 
                 // rideStartTime:1
             });
