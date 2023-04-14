@@ -1785,7 +1785,7 @@ const getOngoingRide = async (req, res) => {
                 message: 'Ongoing Ride',
                 ride: {
                     customerId: ride.customerId,
-                    driverId: ride.driverId,
+                    driverId: ride.driverId._id,
                     rideId: ride._id,
                     pickupLocation: ride.pickupLocation,
                     pickupLatitude: ride.pickupLatitude,
