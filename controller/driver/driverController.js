@@ -1060,34 +1060,34 @@ const deleteDriver = async (req, res) => {
 //     try {
 //       // Get token from header (Authorization)
 //       const token = req.headers.authorization.split(' ')[1];
-  
+
 //       // Decode token to get Driver Id
 //       const decodeToken = jwt.decode(token);
 //       const driverId = decodeToken.driverId;
-  
+
 //       // Generate confirmation OTP
 //       const confirmOtp = Math.floor(1000 + Math.random() * 9000);
-  
+
 //       const ride_id = req.body.ride_id;
 //       const findRideStatus = await rideModel.findOne({ _id: ride_id });
-  
+
 //       if (findRideStatus && findRideStatus.status === "requested") {
 //         const filter = { _id: ride_id };
 //         const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp };
 //         const options = { new: true };
 //         const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
-  
+
 //         if (rideAccepted) {
 //           const driverFilter = { _id: driverId };
 //           const driverUpdate = { isAvailable: false };
 //           const option = { new: true };
 //           await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, option);
-  
+
 //           const findDriver = await driverBasicDetailsMOdel
 //             .findOne({ _id: driverId })
 //             .populate({ path: "vehicleType", select: ["name"] })
 //             .populate({ path: "currentRide", select: ["driverId"] });
-  
+
 //           if (findDriver) {
 //             res.status(200).send({
 //               success: true,
@@ -1217,16 +1217,16 @@ const deleteDriver = async (req, res) => {
 //       const token = req.headers.authorization.split(' ')[1];
 //       const decodeToken = jwt.decode(token);
 //       const driverId = decodeToken.driverId;
-  
+
 //       const rideId = req.body.ride_id;
 //       const findRideStatus = await rideModel.findOne({ _id: rideId });
-  
+
 //       if (findRideStatus && findRideStatus.status === 'requested') {
 //         const filter = { _id: rideId };
 //         const update = { status: 'Decline', driverId };
 //         const options = { new: true };
 //         const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
-  
+
 //         if (rideDeclined) {
 //           const driverFilter = { _id: driverId };
 //           const driverUpdate = { hasRide: false };
@@ -1300,9 +1300,9 @@ const deleteDriver = async (req, res) => {
 // Navigate to pickup location
 const navigateToPickupPoint = async (req, res) => {
     try {
-        const pickupLatitude = req.body.pickupLatitude; // [37.7749, -122.4194]; // example pickup location
-        const pickupLongitude = req.body.pickupLongitude;
-        const currentLocation = req.body.currentLocation; // [37.7739, -122.4312]; // example driver location
+        // const pickupLatitude = req.body.pickupLatitude; // [37.7749, -122.4194]; // example pickup location
+        // const pickupLongitude = req.body.pickupLongitude;
+        // const currentLocation = req.body.currentLocation; // [37.7739, -122.4312]; // example driver location
         const distanceThreshold = 100; // threshold distance in meters
         const averageDrivingSpeed = 30; // average driving speed in km/h
 
@@ -1316,7 +1316,7 @@ const navigateToPickupPoint = async (req, res) => {
             res.status(200).send({
                 success: true,
                 message: "You have reached the pickup location!",
-                nextScreen: "Enter OTP"
+                nextScreen: "enter_otp"
             });
         } else {
             res.status(200).send({
@@ -1337,7 +1337,7 @@ const navigateToPickupPoint = async (req, res) => {
 const startRide = async (req, res) => {
     try {
         const rideId = req.body.rideId;
-        const ride = await rideModel.findById({_id:rideId});
+        const ride = await rideModel.findById({ _id: rideId });
         if (!ride) {
             return res.status(404).json({ success: false, message: 'Ride not found' });
         }
@@ -1350,7 +1350,7 @@ const startRide = async (req, res) => {
 
         // Convert UTC date to local timezone and format it
         //const localDate = moment.utc(ride.rideStartTime).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-        return res.json({ success: true, message: 'Ride started successfully', nextScreen: 'Reached to Destination Screen' });
+        return res.json({ success: true, message: 'Ride started successfully', nextScreen: 'reached_to_Destination' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
@@ -1396,11 +1396,11 @@ const startRide = async (req, res) => {
 
 const reachedToDestination = async (req, res) => {
     try {
-        const destinationLatitude = req.body.destinationLatitude;
-        const destinationLongitude = req.body.destinationLongitude;
-        const latitude = req.body.latitude;
-        const longitude = req.body.longitude;
-        const currentLocation = { latitude, longitude };
+        // const destinationLatitude = req.body.destinationLatitude;
+        // const destinationLongitude = req.body.destinationLongitude;
+        // const latitude = req.body.latitude;
+        // const longitude = req.body.longitude;
+        // const currentLocation = { latitude, longitude };
         const distanceThreshold = 100; // threshold distance in meters
         const averageDrivingSpeed = 30; // average driving speed in km/h
 
@@ -1414,7 +1414,7 @@ const reachedToDestination = async (req, res) => {
             res.status(200).send({
                 success: true,
                 message: "You have reached the destination location!",
-                nextScreen: "Make Payment Screen"
+                nextScreen: "make_payment_screen"
             });
         } else {
             res.status(200).send({
@@ -1482,7 +1482,7 @@ const endRide = async (req, res) => {
                 success: true,
                 message: "Ride ended successfully",
                 //finalFare: fare,
-                nextScreen: 'Ratting Screen'
+                nextScreen: 'ratting'
             });
         } else {
             res.status(400).send({
@@ -1626,7 +1626,7 @@ const totalEarning = async (req, res) => {
 };
 
 // get ongoing ride of driver
-const getOngoingRide = async(req,res)=>{
+const getOngoingRide = async (req, res) => {
     try {
         // Get token from header (Authorization)
         const token = req.headers.authorization.split(' ')[1]
@@ -1640,48 +1640,50 @@ const getOngoingRide = async(req,res)=>{
             // .populate({ path: 'vehicleType', select: ['name'] })
             .select({
                 //customerId:1,
-                _id:1,
+                _id: 1,
                 pickupLocation: 1,
                 pickupLatitude: 1,
-                pickupLongitude:1,
+                pickupLongitude: 1,
                 destinationLocation: 1,
-                destinationLatitude:1,
-                destinationLongitude:1,
-                numberOfPassengers:1,
-                vehicleType:1,
+                destinationLatitude: 1,
+                destinationLongitude: 1,
+                numberOfPassengers: 1,
+                vehicleType: 1,
                 fare: 1,
                 distance: 1,
                 paymentMethod: 1,
-                status:1,
-                
+                status: 1,
+                confirmOtp
+
                 // rideStartTime:1
             });
 
-            if (findRides.length) {
-                const ride = findRides[0]; // use the first element of the array
-                res.status(200).send({
-                    success: true,
-                    Ongoing: true,
-                    message: 'Ongoing Ride',
-                    ride: {
-                        customerId:ride.customerId,
-                        driverId:ride.driverId,
-                        rideId:ride._id,
-                        pickupLocation:ride.pickupLocation,
-                        pickupLatitude:ride.pickupLatitude,
-                        pickupLongitude:ride.pickupLongitude,
-                        destinationLocation:ride.destinationLocation,
-                        destinationLatitude:ride.destinationLatitude,
-                        destinationLongitude:ride.destinationLongitude,
-                        numberOfPassengers:ride.numberOfPassengers,
-                        vehicleType:ride.vehicleType,
-                        fare:ride.fare,
-                        distance:ride.distance,
-                        paymentMethod:ride.paymentMethod,
-                        status:ride.status,
+        if (findRides.length) {
+            const ride = findRides[0]; // use the first element of the array
+            res.status(200).send({
+                success: true,
+                Ongoing: true,
+                message: 'Ongoing Ride',
+                ride: {
+                    customerId: ride.customerId,
+                    driverId: ride.driverId,
+                    rideId: ride._id,
+                    pickupLocation: ride.pickupLocation,
+                    pickupLatitude: ride.pickupLatitude,
+                    pickupLongitude: ride.pickupLongitude,
+                    destinationLocation: ride.destinationLocation,
+                    destinationLatitude: ride.destinationLatitude,
+                    destinationLongitude: ride.destinationLongitude,
+                    numberOfPassengers: ride.numberOfPassengers,
+                    vehicleType: ride.vehicleType,
+                    fare: ride.fare,
+                    distance: ride.distance,
+                    paymentMethod: ride.paymentMethod,
+                    status: ride.status,
+                    confirmOtp: ride.confirmOtp
 
-                    }
-                });
+                }
+            });
         } else {
             res.status(404).send({
                 success: false,
@@ -2112,138 +2114,138 @@ const getTotalRidesWithStatus = async (req, res) => {
 // accept ride request 
 const acceptRideRequest = async (req, res) => {
     try {
-      // Get token from header (Authorization)
-      const token = req.headers.authorization.split(' ')[1];
-  
-      // Decode token to get Driver Id
-      const decodeToken = jwt.decode(token);
-      const driverId = decodeToken.driverId;
-  
-      // Generate confirmation OTP
-      const confirmOtp = Math.floor(1000 + Math.random() * 9000);
-  
-      const ride_id = req.body.ride_id;
-      const findRideStatus = await rideModel.findOne({ _id: ride_id });
+        // Get token from header (Authorization)
+        const token = req.headers.authorization.split(' ')[1];
 
-      // Get the current date and time in India Standard Time (IST)
-const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+        // Decode token to get Driver Id
+        const decodeToken = jwt.decode(token);
+        const driverId = decodeToken.driverId;
 
-// Get the month name from the current date in IST
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        // Generate confirmation OTP
+        const confirmOtp = Math.floor(1000 + Math.random() * 9000);
 
-// Set the createdAt and rideStartTime fields
-const rideStartTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
-const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+        const ride_id = req.body.ride_id;
+        const findRideStatus = await rideModel.findOne({ _id: ride_id });
 
-  
-      if (findRideStatus && (findRideStatus.status === "requested" || findRideStatus.status === "Decline")) {
-        const filter = { _id: ride_id };
-        const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp,updatedAt:updatedAt,rideStartTime:rideStartTime };
-        const options = { new: true };
-        const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
-  
-        if (rideAccepted) {
-          const driverFilter = { _id: driverId };
-          const driverUpdate = { isAvailable: false };
-          const option = { new: true };
-          await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, option);
-  
-          const findDriver = await driverBasicDetailsMOdel
-            .findOne({ _id: driverId })
-            .populate({ path: "vehicleType", select: ["name"] })
-            .populate({ path: "currentRide", select: ["driverId"] });
-  
-          if (findDriver) {
+        // Get the current date and time in India Standard Time (IST)
+        const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+
+        // Get the month name from the current date in IST
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // Set the createdAt and rideStartTime fields
+        const rideStartTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+        const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+
+
+        if (findRideStatus && (findRideStatus.status === "requested" || findRideStatus.status === "Decline")) {
+            const filter = { _id: ride_id };
+            const update = { status: "Accepted", driverId: driverId, confirmOtp: confirmOtp, updatedAt: updatedAt, rideStartTime: rideStartTime };
+            const options = { new: true };
+            const rideAccepted = await rideModel.findByIdAndUpdate(filter, update, options);
+
+            if (rideAccepted) {
+                const driverFilter = { _id: driverId };
+                const driverUpdate = { isAvailable: false };
+                const option = { new: true };
+                await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, option);
+
+                const findDriver = await driverBasicDetailsMOdel
+                    .findOne({ _id: driverId })
+                    .populate({ path: "vehicleType", select: ["name"] })
+                    .populate({ path: "currentRide", select: ["driverId"] });
+
+                if (findDriver) {
+                    res.status(200).send({
+                        success: true,
+                        fullName: findDriver.drivingLicence.fullName,
+                        selfie: findDriver.selfie,
+                        ratting: findDriver.ratting,
+                        registrationID: findDriver.vehiclesDetails.registrationID,
+                        pickupLocation: findRideStatus.pickupLocation,
+                        destinationLocation: findRideStatus.destinationLocation,
+                        paymentMethod: findRideStatus.paymentMethod,
+                        message: "Ride accepted successfully",
+                        nextScreen: "Navigate to pickup point Screen",
+                    });
+                }
+            }
+        } else if (findRideStatus && findRideStatus.status === "Accepted") {
             res.status(200).send({
-              success: true,
-              fullName: findDriver.drivingLicence.fullName,
-              selfie: findDriver.selfie,
-              ratting: findDriver.ratting,
-              registrationID: findDriver.vehiclesDetails.registrationID,
-              pickupLocation: findRideStatus.pickupLocation,
-              destinationLocation: findRideStatus.destinationLocation,
-              paymentMethod: findRideStatus.paymentMethod,
-              message: "Ride accepted successfully",
-              nextScreen: "Navigate to pickup point Screen",
+                success: false,
+                message: "This ride has already been accepted by another driver. Please wait for a new ride request.",
+                nextScreen: "home_screen",
             });
-          }
+        } else {
+            res.status(404).send({
+                success: false,
+                message: "Ride not found",
+            });
         }
-      } else if (findRideStatus && findRideStatus.status === "Accepted") {
-        res.status(200).send({
-          success: false,
-          message: "This ride has already been accepted by another driver. Please wait for a new ride request.",
-          nextScreen: "home_screen",
-        });
-      } else {
-        res.status(404).send({
-          success: false,
-          message: "Ride not found",
-        });
-      }
     } catch (error) {
-      console.error(error);
-      res.status(500).send({
-        success: false,
-        message: "Something went wrong. Please try again later.",
-      });
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: "Something went wrong. Please try again later.",
+        });
     }
-  };
+};
 
 // decline ride request
 const declineRideRequest = async (req, res) => {
     try {
-      const token = req.headers.authorization.split(' ')[1];
-      const decodeToken = jwt.decode(token);
-      const driverId = decodeToken.driverId;
-  
-      const rideId = req.body.ride_id;
-      const findRideStatus = await rideModel.findOne({ _id: rideId });
-        
+        const token = req.headers.authorization.split(' ')[1];
+        const decodeToken = jwt.decode(token);
+        const driverId = decodeToken.driverId;
+
+        const rideId = req.body.ride_id;
+        const findRideStatus = await rideModel.findOne({ _id: rideId });
+
         // Get the current date and time in India Standard Time (IST)
-const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+        const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
 
-// Get the month name from the current date in IST
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        // Get the month name from the current date in IST
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// Set the updatedAt  fields
-const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+        // Set the updatedAt  fields
+        const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
 
-  
-      if (findRideStatus && findRideStatus.status === 'requested') {
-        const filter = { _id: rideId };
-        const update = { status: 'Decline', driverId , updatedAt:updatedAt};
-        const options = { new: true };
-        const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
-  
-        if (rideDeclined) {
-          const driverFilter = { _id: driverId };
-          const driverUpdate = { hasRide: false };
-          await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
-          res.status(200).send({
-            success: true,
-            message: 'Ride request declined',
-            nextScreen: 'home_screen',
-          });
+
+        if (findRideStatus && findRideStatus.status === 'requested') {
+            const filter = { _id: rideId };
+            const update = { status: 'Decline', driverId, updatedAt: updatedAt };
+            const options = { new: true };
+            const rideDeclined = await rideModel.findByIdAndUpdate(filter, update, options);
+
+            if (rideDeclined) {
+                const driverFilter = { _id: driverId };
+                const driverUpdate = { hasRide: false };
+                await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate);
+                res.status(200).send({
+                    success: true,
+                    message: 'Ride request declined',
+                    nextScreen: 'home_screen',
+                });
+            } else {
+                res.status(400).send({
+                    success: false,
+                    message: 'Ride not found',
+                });
+            }
         } else {
-          res.status(400).send({
-            success: false,
-            message: 'Ride not found',
-          });
+            res.status(400).send({
+                success: false,
+                message: 'Invalid ride status',
+            });
         }
-      } else {
-        res.status(400).send({
-          success: false,
-          message: 'Invalid ride status',
-        });
-      }
     } catch (error) {
-      console.error(error);
-      res.status(500).send({
-        success: false,
-        message: 'Server Error',
-      });
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: 'Server Error',
+        });
     }
-  };
+};
 
 
 module.exports = {
@@ -2253,5 +2255,5 @@ module.exports = {
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout, updatePersonalDetails,
     driverRatting, acceptRideRequest, declineRideRequest, navigateToPickupPoint, startRide, reachedToDestination,
-    endRide, totalEarning, getAllRides, writeToUs, getTotalRides, getTotalRidesWithStatus,getOngoingRide
+    endRide, totalEarning, getAllRides, writeToUs, getTotalRides, getTotalRidesWithStatus, getOngoingRide
 }
