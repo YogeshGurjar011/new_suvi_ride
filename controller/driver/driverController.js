@@ -254,6 +254,7 @@ const driverLogin = async (req, res) => {
                 mobileNumber: mobileNumber,
                 language: language,
                 deviceToken: deviceToken,
+                currentLocation: { type: "Point", coordinates: [0, 0] } 
             });
             const newDriverResult = await newDriver.save();
             if (newDriverResult) {
