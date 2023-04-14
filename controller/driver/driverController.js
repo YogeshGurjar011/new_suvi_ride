@@ -333,7 +333,14 @@ const driverLogin = async (req, res) => {
 // Registration  = Driver Driving Licence Details
 const driverDrivingLicence = async (req, res) => {
     try {
-        const { mobileNumber, fullName, address, gender, licenceNumber, issuedDate, validitiy } = req.body;
+        let { mobileNumber, fullName, address, gender, licenceNumber, issuedDate, validitiy } = req.body;
+          mobileNumber = mobileNumber.replace(/"/g, '');
+        fullName = fullName.replace(/"/g, '');
+        address = address.replace(/"/g, '');
+        gender = gender.replace(/"/g, '');
+        licenceNumber = licenceNumber.replace(/"/g, '');
+        issuedDate = issuedDate.replace(/"/g, '');
+        validitiy = validitiy.replace(/"/g, '');
         //const { uploadImage } = req.file.filename;
         // if (!fullName) {
         //     return res.status(400).send({
@@ -440,7 +447,13 @@ const driverDrivingLicence = async (req, res) => {
 // Registration  = Driver Vehicle Details
 const driverVehicleDetails = async (req, res) => {
     try {
-        const { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity, vehicleType } = req.body;
+        let { vehicleModelNumber, registrationID, dateofRegistration, registrationValidity, vehicleType } = req.body;
+          vehicleModelNumber = vehicleModelNumber.replace(/"/g, '');
+        registrationID = registrationID.replace(/"/g, '');
+        dateofRegistration = dateofRegistration.replace(/"/g, '');
+        registrationValidity = registrationValidity.replace(/"/g, '');
+        vehicleType = vehicleType.replace(/"/g, '');
+        
         console.log("--------------------data", req.body)
         // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
@@ -522,7 +535,10 @@ const driverVehicleDetails = async (req, res) => {
 // Registration  = Add Bank Details   
 const driverAddBankDetails = async (req, res) => {
     try {
-        const { accountNumber, IFSC } = req.body;
+        let { accountNumber, IFSC } = req.body;
+        accountNumber = accountNumber.replace(/"/g, '');
+        IFSC = IFSC.replace(/"/g, '');
+ 
         // Get token from header (Authorication)
         const token = req.headers.authorization.split(' ')[1];
 
@@ -704,16 +720,16 @@ const driverDocumentsVerification = async (req, res) => {
         else {
             const { verificationStatus, drivingLicence, vehiclesDetails } = result
             if (drivingLicence.verification !== 'verified') {
-                return res.status(400).send({
+                return res.status(200).send({
                     success: false,
-                    successCode: 400,
+                    successCode: 200,
                     message: 'Your Driving Licence Verification is pendding it will take some time to verify'
                 })
             }
             if (vehiclesDetails.verification !== 'verified') {
-                return res.status(400).send({
+                return res.status(200).send({
                     success: false,
-                    successCode: 400,
+                    successCode: 200,
                     message: 'Your Vehicles Details Verification is pendding it will take some time to verify'
                 })
             }
@@ -732,14 +748,15 @@ const driverDocumentsVerification = async (req, res) => {
                     successCode: 200,
                     // data: result,
                     message: 'Registration successfull',
-                    nextScreen: 'Home Screen'
+                    nextScreen: 'home_screen'
                 })
             }
             else {
-                res.status(400).send({
+                res.status(200).send({
                     success: false,
-                    successCode: 400,
-                    message: 'You have to wait for an houre We will verify your documents'
+                    successCode: 200,
+                    message: 'You have to wait for an houre We will verify your documents',
+                    nextScreen: 'waiting_screen'
                 })
             }
         }
@@ -785,7 +802,7 @@ const checkDriverDocumentsVerificationByAdmin = async (req, res) => {
                     'drivingLicence.verification': req.body.drivingLicenceVerification,
                     'vehiclesDetails.verification': req.body.vehiclesDetailsVerification,
                     'bankDetails.verification': req.body.bankDetailsVerification,
-                    verificationStatus: (req.body.drivingLicenceVerification === 'success' && req.body.vehiclesDetailsVerification === 'success' && req.body.bankDetailsVerification === 'success') ? 'success' : 'pending'
+                    verificationStatus: (req.body.drivingLicenceVerification === 'verified' && req.body.vehiclesDetailsVerification === 'verified' && req.body.bankDetailsVerification === 'verified') ? 'verified' : 'pending'
                 }
             },
             { new: true }
