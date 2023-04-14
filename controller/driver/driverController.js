@@ -384,7 +384,7 @@ const driverLogin = async (req, res) => {
               fullName: result.drivingLicence.fullName,
               gender: result.drivingLicence.gender,
               selfie: result.selfie,
-              status: result.status,
+              Status: result.Status,
               token: result.token,
             },
             nextScreen: "registration",
@@ -428,7 +428,7 @@ const driverLogin = async (req, res) => {
         error: error.message,
       });
     }
-  };
+};
   
 
 // Registration 
