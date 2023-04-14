@@ -286,7 +286,8 @@ const driverLogin = async (req, res) => {
 
                         // deviceToken: result.deviceToken
                     },
-                    nextScreen: "registration",
+//                     nextScreen: "registration",
+                    nextScreen:"verification"
                 });
             } else {
                 // Update the user's deviceToken and token
@@ -2182,6 +2183,7 @@ const acceptRideRequest = async (req, res) => {
                         pickupLocation: findRideStatus.pickupLocation,
                         destinationLocation: findRideStatus.destinationLocation,
                         paymentMethod: findRideStatus.paymentMethod,
+                         confirmOtp: rideAccepted.confirmOtp,
                         message: "Ride accepted successfully",
                         nextScreen: "Navigate to pickup point Screen",
                     });
