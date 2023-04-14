@@ -1515,6 +1515,7 @@ const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "nume
         //const localDate = moment.utc(ride.rideStartTime).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
         return res.json({ success: true, message: 'Ride started successfully', nextScreen: 'reached_to_Destination' });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
