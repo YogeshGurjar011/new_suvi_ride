@@ -1779,7 +1779,81 @@ const totalEarning = async (req, res) => {
 };
 
 // get ongoing ride of driver
-const getOngoingRide = async (req, res) => {
+// const getOngoingRide = async (req, res) => {
+//     try {
+//         // Get token from header (Authorization)
+//         const token = req.headers.authorization.split(' ')[1]
+//         // Decode token to get Driver Id
+//         const decodeToken = jwt.decode(token)
+//         const driverId = decodeToken.driverId
+//         const findRides = await rideModel
+//             .find({ driverId: driverId, status: "Ongoing" })
+//             .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+//             .populate({ path: 'driverId', select: ['fullName', 'profileImage'] })
+//             // .populate({ path: 'vehicleType', select: ['name'] })
+//             .select({
+//                 //customerId:1,
+//                 _id: 1,
+//                 pickupLocation: 1,
+//                 pickupLatitude: 1,
+//                 pickupLongitude: 1,
+//                 destinationLocation: 1,
+//                 destinationLatitude: 1,
+//                 destinationLongitude: 1,
+//                 numberOfPassengers: 1,
+//                 vehicleType: 1,
+//                 fare: 1,
+//                 distance: 1,
+//                 paymentMethod: 1,
+//                 status: 1,
+//                 confirmOtp: 1
+
+//                 // rideStartTime:1
+//             });
+
+//         if (findRides.length) {
+//             const ride = findRides[0]; // use the first element of the array
+//             res.status(200).send({
+//                 success: true,
+//                 Ongoing: true,
+//                 message: 'Ongoing Ride',
+//                 ride: {
+//                     customerId: ride.customerId,
+//                     driverId: ride.driverId._id,
+//                     rideId: ride._id,
+//                     pickupLocation: ride.pickupLocation,
+//                     pickupLatitude: ride.pickupLatitude,
+//                     pickupLongitude: ride.pickupLongitude,
+//                     destinationLocation: ride.destinationLocation,
+//                     destinationLatitude: ride.destinationLatitude,
+//                     destinationLongitude: ride.destinationLongitude,
+//                     numberOfPassengers: ride.numberOfPassengers,
+//                     vehicleType: ride.vehicleType,
+//                     fare: ride.fare,
+//                     distance: ride.distance,
+//                     paymentMethod: ride.paymentMethod,
+//                     status: ride.status,
+//                     confirmOtp: ride.confirmOtp
+
+//                 }
+//             });
+//         } else {
+//             res.status(404).send({
+//                 success: false,
+//                 Ongoing: false,
+//                 message: 'Driver does not have any Ongoing ride',
+//             });
+//         }
+//     } catch (error) {
+//         res.status(500).send({
+//             success: false,
+//             message: 'Internal server error',
+//             error: error.message,
+//         });
+//     }
+// }
+
+const getOngoingRide = async(req,res)=>{
     try {
         // Get token from header (Authorization)
         const token = req.headers.authorization.split(' ')[1]
@@ -1787,64 +1861,62 @@ const getOngoingRide = async (req, res) => {
         const decodeToken = jwt.decode(token)
         const driverId = decodeToken.driverId
         const findRides = await rideModel
-            .find({ driverId: driverId, status: "Ongoing" })
+            .find({ driverId: driverId})
+            .sort({ rideStartTime: -1 }) // sort rides by descending order of start time
+            .limit(1) // limit the number of results to 1
             .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
             .populate({ path: 'driverId', select: ['fullName', 'profileImage'] })
-            // .populate({ path: 'vehicleType', select: ['name'] })
             .select({
-                //customerId:1,
-                _id: 1,
+                _id:1,
                 pickupLocation: 1,
                 pickupLatitude: 1,
-                pickupLongitude: 1,
+                pickupLongitude:1,
                 destinationLocation: 1,
-                destinationLatitude: 1,
-                destinationLongitude: 1,
-                numberOfPassengers: 1,
-                vehicleType: 1,
+                destinationLatitude:1,
+                destinationLongitude:1,
+                numberOfPassengers:1,
+                vehicleType:1,
                 fare: 1,
                 distance: 1,
                 paymentMethod: 1,
-                status: 1,
-                confirmOtp: 1
-
-                // rideStartTime:1
+                status:1,
+                rideStartTime:1
             });
 
         if (findRides.length) {
-            const ride = findRides[0]; // use the first element of the array
+            const ride = findRides[0]; // use the first (and only) element of the array
             res.status(200).send({
                 success: true,
                 Ongoing: true,
                 message: 'Ongoing Ride',
                 ride: {
-                    customerId: ride.customerId,
-                    driverId: ride.driverId._id,
-                    rideId: ride._id,
-                    pickupLocation: ride.pickupLocation,
-                    pickupLatitude: ride.pickupLatitude,
-                    pickupLongitude: ride.pickupLongitude,
-                    destinationLocation: ride.destinationLocation,
-                    destinationLatitude: ride.destinationLatitude,
-                    destinationLongitude: ride.destinationLongitude,
-                    numberOfPassengers: ride.numberOfPassengers,
-                    vehicleType: ride.vehicleType,
-                    fare: ride.fare,
-                    distance: ride.distance,
-                    paymentMethod: ride.paymentMethod,
-                    status: ride.status,
-                    confirmOtp: ride.confirmOtp
-
+                    customerId:ride.customerId,
+                    driverId:ride.driverId._id,
+                    rideId:ride._id,
+                    pickupLocation:ride.pickupLocation,
+                    pickupLatitude:ride.pickupLatitude,
+                    pickupLongitude:ride.pickupLongitude,
+                    destinationLocation:ride.destinationLocation,
+                    destinationLatitude:ride.destinationLatitude,
+                    destinationLongitude:ride.destinationLongitude,
+                    numberOfPassengers:ride.numberOfPassengers,
+                    vehicleType:ride.vehicleType,
+                    fare:ride.fare,
+                    distance:ride.distance,
+                    paymentMethod:ride.paymentMethod,
+                    status:ride.status,
+                    rideStartTime:ride.rideStartTime
                 }
             });
         } else {
             res.status(404).send({
                 success: false,
                 Ongoing: false,
-                message: 'Driver does not have any Ongoing ride',
+                message: 'Driver does not have any ongoing ride',
             });
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send({
             success: false,
             message: 'Internal server error',
