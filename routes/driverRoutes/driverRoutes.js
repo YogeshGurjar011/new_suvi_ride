@@ -57,7 +57,7 @@ router.post('/driver/declineRideRequest',driverValidation,driverController.decli
 
 router.post('/driver/navigateToPickupPoint',driverController.navigateToPickupPoint);
 
-router.get('/driver/enterOtp',driverController.enterOtp);
+router.post('/driver/enterOtp',driverController.enterOtp);
 
 router.post('/driver/startRide',driverController.startRide);
 
