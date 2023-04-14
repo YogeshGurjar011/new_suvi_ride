@@ -721,14 +721,14 @@ const driverDocumentsVerification = async (req, res) => {
             const { verificationStatus, drivingLicence, vehiclesDetails } = result
             if (drivingLicence.verification !== 'verified') {
                 return res.status(200).send({
-                    success: true,
+                    success: false,
                     successCode: 200,
                     message: 'Your Driving Licence Verification is pendding it will take some time to verify'
                 })
             }
             if (vehiclesDetails.verification !== 'verified') {
                 return res.status(200).send({
-                    success: true,
+                    success: false,
                     successCode: 200,
                     message: 'Your Vehicles Details Verification is pendding it will take some time to verify'
                 })
@@ -753,7 +753,7 @@ const driverDocumentsVerification = async (req, res) => {
             }
             else {
                 res.status(200).send({
-                    success: true,
+                    success: false,
                     successCode: 200,
                     message: 'You have to wait for an houre We will verify your documents',
                     nextScreen: 'waiting_screen'
