@@ -351,27 +351,21 @@ const driverLogin = async (req, res) => {
           message: "Please provide a valid fcmToken.",
         });
       }
-      const result = await driverBasicDetailsMOdel.find({ mobileNumber });
-      if (!result.length[0]) {
+      const result = await driverBasicDetailsMOdel.find({ mobileNumber })
+      .populate({ path: "language", select: ["name"] })
+    .exec();
+      if (result.length === 0) {
         const newDriver = new driverBasicDetailsMOdel({
           mobileNumber: mobileNumber,
           language: language,
           deviceToken: deviceToken,
         });
-        const newDriverResult = await newDriver.save();
-        if (newDriverResult) {
+        await newDriver.save();
           res.status(200).send({
             success: true,
             message: "Mobile Number Verified",
             nextScreen: "registration",
-          });
-        } else {
-          res.status(400).send({
-            success: false,
-            successCode: 400,
-            message: "Mobile Number Is Not Verified ",
-          });
-        }
+          })
       } else {
         if (result.verificationStatus === "failed") {
           res.status(200).send({
