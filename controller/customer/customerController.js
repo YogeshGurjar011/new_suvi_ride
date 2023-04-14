@@ -1472,9 +1472,9 @@ const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // Set the createdAt and rideStartTime fields
-const createdAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+const createdAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
 // const rideStartTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
-const updatedAt = new Date(nowIST).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
 
     const ride = new customerRidesModel({
       customerId,
