@@ -1452,6 +1452,37 @@ const navigateToPickupPoint = async (req, res) => {
     }
 };
 
+// enter otp screen
+const enterOtp = async(req,res)=>{
+    try {
+        const rideId = req.body.rideId
+        const findRide = await rideModel.find({_id:rideId});
+        if(findRide){
+            res.status(200).send({
+                success:true,
+                message:"Destination Location",
+                destinationLocation:findRide.destinationLocation,
+                destinationLatitude:findRide.destinationLatitude,
+                destinationLongitude:findRide.destinationLongitude
+            })
+        }
+        else{
+            res.status(404).send({
+                success:false,
+                message:"Destination location not found"
+            })
+        }
+    } catch (error) {
+        res.status(500).send({
+            success:false,
+            message:"Internal server error",
+            error:error.message
+        })
+    }
+
+}
+
+
 // start ride 
 const startRide = async (req, res) => {
     try {
@@ -2375,5 +2406,5 @@ module.exports = {
     driverDocumentsVerification, checkDriverDocumentsVerificationByAdmin, updateDriverStatus,
     totalDrivers, updateDriverCurrentLocation, deleteDriver, driverLogout, updatePersonalDetails,
     driverRatting, acceptRideRequest, declineRideRequest, navigateToPickupPoint, startRide, reachedToDestination,
-    endRide, totalEarning, getAllRides, writeToUs, getTotalRides, getTotalRidesWithStatus, getOngoingRide
+    endRide, totalEarning, getAllRides, writeToUs, getTotalRides, getTotalRidesWithStatus, getOngoingRide,enterOtp
 }
