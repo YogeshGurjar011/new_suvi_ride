@@ -2347,7 +2347,8 @@ const acceptRideRequest = async (req, res) => {
         const driverId = decodeToken.driverId;
 
         // Generate confirmation OTP
-        const confirmOtp = Math.floor(1000 + Math.random() * 9000);
+//         const confirmOtp = Math.floor(1000 + Math.random() * 9000);
+        const confirmOtp = Math.floor(100000 + Math.random() * 900000); 
 
         const ride_id = req.body.ride_id;
         const findRideStatus = await rideModel.findOne({ _id: ride_id });
