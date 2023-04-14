@@ -748,7 +748,7 @@ const driverDocumentsVerification = async (req, res) => {
                     successCode: 200,
                     // data: result,
                     message: 'Registration successfull',
-                    nextScreen: 'Home Screen'
+                    nextScreen: 'home_screen'
                 })
             }
             else {
