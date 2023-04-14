@@ -224,213 +224,211 @@ const app2Messaging = admin.messaging(app2);
 //   };
 
 // Driver Login
-// const driverLogin = async (req, res) => {
-//   try {
-//     const { mobileNumber, language, deviceToken } = req.body;
-//     if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
-//       return res.status(400).send({
-//         success: false,
-//         successCode: 400,
-//         message: "Please provide a valid mobile number in the format of +911234567890.",
-//       });
-//     }
-//     if (!language) {
-//       return res.status(400).send({
-//         success: false,
-//         successCode: 400,
-//         message: "Please provide a valid language code.",
-//       });
-//     }
-//     if (!deviceToken) {
-//       return res.status(400).send({
-//         success: false,
-//         successCode: 400,
-//         message: "Please provide a valid fcmToken.",
-//       });
-//     }
-//     const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
-//     if (!result) {
-//       const newDriver = new driverBasicDetailsMOdel({
-//         mobileNumber: mobileNumber,
-//         language: language,
-//         deviceToken: deviceToken,
-//       });
-//       const newDriverResult = await newDriver.save();
-//       if (newDriverResult) {
-//         res.status(200).send({
-//           success: true,
-//           message: "Mobile Number Verified",
-//           nextScreen: "registration",
-//         });
-//       } else {
-//         res.status(400).send({
-//           success: false,
-//           successCode: 400,
-//           message: "Mobile Number Is Not Verified ",
-//         });
-//       }
-//     } else {
-//       if (result.verificationStatus === "failed") {
-//         res.status(200).send({
-//           success: true,
-//           message: "Driver With This Number Is Already Exists",
-//           data: {
-//             driverId: result._id,
-//             mobileNumber: result.mobileNumber,
-//             language: result.language,
-//             fullName: result.drivingLicence.fullName,
-//             gender: result.drivingLicence.gender,
-//             selfie: result.selfie,
-//             status: result.status,
-//             token: result.token,
-//           },
-//           nextScreen: "registration",
-//         });
-//       } else {
-//         // Update the user's deviceToken and token
-//         const token = jwt.sign(
-//           {
-//             driverId: result._id,
-//             language: result.language.name,
-//             mobileNumber: result.mobileNumber,
-//             fullName: result.drivingLicence.fullName,
-//             verificationStatus: result.verificationStatus,
-//             vehicleType: result.vehicleType,
-//             currentLocation: result.currentLocation,
-//             hasRide: result.hasRide,
-//             currentRide: result.currentRide,
-//             passengerCapacity: result.passengerCapacity,
-//             status: result.status,
-//           },
-//           "secretKey"
-//         );
-//         result.token = token;
-//         result.deviceToken = deviceToken;
-//         const updateToken = await result.save();
-//         res.status(200).send({
-//           success: true,
-//           successCode: 200,
-//           message: "This Driver Is Already Registered",
-//           data: updateToken,
-//           nextScreen: "home_screen",
-//         });
-//       }
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({
-//       success: false,
-//       successCode: 500,
-//       message: "Internal Server Error",
-//       error: error.message,
-//     });
-//   }
-// };
-
 const driverLogin = async (req, res) => {
-    try {
-      const { mobileNumber, language, deviceToken } = req.body;
-      if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
-        return res.status(400).send({
-          success: false,
-          successCode: 400,
-          message: "Please provide a valid mobile number in the format of +911234567890.",
-        });
-      }
-      if (!language) {
-        return res.status(400).send({
-          success: false,
-          successCode: 400,
-          message: "Please provide a valid language code.",
-        });
-      }
-      if (!deviceToken) {
-        return res.status(400).send({
-          success: false,
-          successCode: 400,
-          message: "Please provide a valid fcmToken.",
-        });
-      }
-      const result = await driverBasicDetailsMOdel.find({ mobileNumber })
-      .populate({ path: "language", select: ["name"] })
-    .exec();
-      if (result.length === 0) {
-        const newDriver = new driverBasicDetailsMOdel({
-          mobileNumber: mobileNumber,
-          language: language,
-          deviceToken: deviceToken,
-        });
-        const newDriverResult = await newDriver.save();
-        if (newDriverResult) {
-          res.status(200).send({
-            success: true,
-            message: "Mobile Number Verified",
-            nextScreen: "registration",
-          });
-        } else {
-          res.status(400).send({
-            success: false,
-            successCode: 400,
-            message: "Mobile Number Is Not Verified ",
-          });
-        }
-      } else {
-        if (result.verificationStatus === "failed") {
-          res.status(200).send({
-            success: true,
-            message: "Driver With This Number Is Already Exists",
-            data: {
-              driverId: result._id,
-              mobileNumber: result.mobileNumber,
-              language: result.language,
-              fullName: result.drivingLicence.fullName,
-              gender: result.drivingLicence.gender,
-              selfie: result.selfie,
-              Status: result.Status,
-              token: result.token,
-            },
-            nextScreen: "registration",
-          });
-        } else {
-          // Update the user's deviceToken and token
-          const token = jwt.sign(
-            {
-              driverId: result._id,
-              language: result.language.name,
-              mobileNumber: result.mobileNumber,
-              fullName: result.drivingLicence.fullName,
-              verificationStatus: result.verificationStatus,
-              vehicleType: result.vehicleType,
-              currentLocation: result.currentLocation,
-              hasRide: result.hasRide,
-              currentRide: result.currentRide,
-              passengerCapacity: result.passengerCapacity,
-              status: result.status,
-            },
-            "secretKey"
-          );
-          result.token = token;
-          result.deviceToken = deviceToken;
-          const updateToken = await result.save();
-          res.status(200).send({
-            success: true,
-            successCode: 200,
-            message: "This Driver Is Already Registered",
-            data: updateToken,
-            nextScreen: "home_screen",
-          });
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).send({
+  try {
+    const { mobileNumber, language, deviceToken } = req.body;
+    if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
+      return res.status(400).send({
         success: false,
-        successCode: 500,
-        message: "Internal Server Error",
-        error: error.message,
+        successCode: 400,
+        message: "Please provide a valid mobile number in the format of +911234567890.",
       });
     }
+    if (!language) {
+      return res.status(400).send({
+        success: false,
+        successCode: 400,
+        message: "Please provide a valid language code.",
+      });
+    }
+    if (!deviceToken) {
+      return res.status(400).send({
+        success: false,
+        successCode: 400,
+        message: "Please provide a valid fcmToken.",
+      });
+    }
+    const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
+    if (!result) {
+      const newDriver = new driverBasicDetailsMOdel({
+        mobileNumber: mobileNumber,
+        language: language,
+        deviceToken: deviceToken,
+      });
+      const newDriverResult = await newDriver.save();
+      if (newDriverResult) {
+        res.status(200).send({
+          success: true,
+          message: "Mobile Number Verified",
+          nextScreen: "registration",
+        });
+      } else {
+        res.status(400).send({
+          success: false,
+          successCode: 400,
+          message: "Mobile Number Is Not Verified ",
+        });
+      }
+    } else {
+      if (result.verificationStatus === "failed") {
+        res.status(200).send({
+          success: true,
+          message: "Driver With This Number Is Already Exists",
+          data: {
+            driverId: result._id,
+            mobileNumber: result.mobileNumber,
+            language: result.language,
+            fullName: result.drivingLicence.fullName,
+            gender: result.drivingLicence.gender,
+            selfie: result.selfie,
+            status: result.status,
+            token: result.token,
+          },
+          nextScreen: "registration",
+        });
+      } else {
+        // Update the user's deviceToken and token
+        const token = jwt.sign(
+          {
+            driverId: result._id,
+            language: result.language.name,
+            mobileNumber: result.mobileNumber,
+            fullName: result.drivingLicence.fullName,
+            verificationStatus: result.verificationStatus,
+            vehicleType: result.vehicleType,
+            currentLocation: result.currentLocation,
+            hasRide: result.hasRide,
+            currentRide: result.currentRide,
+            passengerCapacity: result.passengerCapacity,
+            status: result.status,
+          },
+          "secretKey"
+        );
+        result.token = token;
+        result.deviceToken = deviceToken;
+        const updateToken = await result.save();
+        res.status(200).send({
+          success: true,
+          successCode: 200,
+          message: "This Driver Is Already Registered",
+          data: updateToken,
+          nextScreen: "home_screen",
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      successCode: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
 };
+
+// const driverLogin = async (req, res) => {
+//     try {
+//       const { mobileNumber, language, deviceToken } = req.body;
+//       if (!mobileNumber || !/^\+\d{1,3}\d{10}$/.test(mobileNumber)) {
+//         return res.status(400).send({
+//           success: false,
+//           successCode: 400,
+//           message: "Please provide a valid mobile number in the format of +911234567890.",
+//         });
+//       }
+//       if (!language) {
+//         return res.status(400).send({
+//           success: false,
+//           successCode: 400,
+//           message: "Please provide a valid language code.",
+//         });
+//       }
+//       if (!deviceToken) {
+//         return res.status(400).send({
+//           success: false,
+//           successCode: 400,
+//           message: "Please provide a valid fcmToken.",
+//         });
+//       }
+//       const result = await driverBasicDetailsMOdel.find({ mobileNumber });
+//       if (!result.length[0]) {
+//         const newDriver = new driverBasicDetailsMOdel({
+//           mobileNumber: mobileNumber,
+//           language: language,
+//           deviceToken: deviceToken,
+//         });
+//         const newDriverResult = await newDriver.save();
+//         if (newDriverResult) {
+//           res.status(200).send({
+//             success: true,
+//             message: "Mobile Number Verified",
+//             nextScreen: "registration",
+//           });
+//         } else {
+//           res.status(400).send({
+//             success: false,
+//             successCode: 400,
+//             message: "Mobile Number Is Not Verified ",
+//           });
+//         }
+//       } else {
+//         if (result.verificationStatus === "failed") {
+//           res.status(200).send({
+//             success: true,
+//             message: "Driver With This Number Is Already Exists",
+//             data: {
+//               driverId: result._id,
+//               mobileNumber: result.mobileNumber,
+//               language: result.language,
+//               fullName: result.drivingLicence.fullName,
+//               gender: result.drivingLicence.gender,
+//               selfie: result.selfie,
+//               Status: result.Status,
+//               token: result.token,
+//             },
+//             nextScreen: "registration",
+//           });
+//         } else {
+//           // Update the user's deviceToken and token
+//           const token = jwt.sign(
+//             {
+//               driverId: result._id,
+//               language: result.language.name,
+//               mobileNumber: result.mobileNumber,
+//               fullName: result.drivingLicence.fullName,
+//               verificationStatus: result.verificationStatus,
+//               vehicleType: result.vehicleType,
+//               currentLocation: result.currentLocation,
+//               hasRide: result.hasRide,
+//               currentRide: result.currentRide,
+//               passengerCapacity: result.passengerCapacity,
+//               status: result.status,
+//             },
+//             "secretKey"
+//           );
+//           result.token = token;
+//           result.deviceToken = deviceToken;
+//           const updateToken = await result.save();
+//           res.status(200).send({
+//             success: true,
+//             successCode: 200,
+//             message: "This Driver Is Already Registered",
+//             data: updateToken,
+//             nextScreen: "home_screen",
+//           });
+//         }
+//       }
+//     } catch (error) {
+//       console.log(error);
+//       res.status(500).send({
+//         success: false,
+//         successCode: 500,
+//         message: "Internal Server Error",
+//         error: error.message,
+//       });
+//     }
+// };
   
 
 // Registration 
