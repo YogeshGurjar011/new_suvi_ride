@@ -1489,7 +1489,7 @@ const enterOtp = async(req,res)=>{
 // start ride 
 const startRide = async (req, res) => {
     try {
-        const rideId = req.body.rideId;
+        const rideId = req.body.ride_id;
         const ride = await rideModel.findById({ _id: rideId });
         if (!ride) {
             return res.status(404).json({ success: false, message: 'Ride not found' });
@@ -1578,7 +1578,7 @@ const reachedToDestination = async (req, res) => {
             res.status(200).send({
                 success: true,
                 message: "You have reached the destination location!",
-                nextScreen: "make_payment_screen"
+                nextScreen: "end_ride"
             });
         } else {
             res.status(200).send({
