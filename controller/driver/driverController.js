@@ -1976,7 +1976,7 @@ const getOngoingRide = async (req, res) => {
 
         res.status(200).json({
             message: "Last ride by driver",
-            data: details
+            ride: details
         });
 
     } catch (error) {
