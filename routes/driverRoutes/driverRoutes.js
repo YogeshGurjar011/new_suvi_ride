@@ -63,7 +63,7 @@ router.post('/driver/startRide',driverController.startRide);
 
 router.post('/driver/reachedToDestination',driverController.reachedToDestination);
 
-router.post('/driver/completeRide/:_id',driverValidation,driverController.endRide);
+router.post('/driver/completeRide',driverValidation,driverController.endRide);
 
 router.post('/driver/driverRatting',driverValidation,driverController.driverRatting);
 
