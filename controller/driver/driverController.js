@@ -1603,7 +1603,7 @@ const endRide = async (req, res) => {
         const decodeToken = jwt.decode(token)
         const driverId = decodeToken.driverId
         // const driverId = req.body.driverId
-        const _id = req.params._id;
+        const _id = req.body._id;
         const findRide = await rideModel.findById(_id);
         if (!findRide) {
             return res.status(404).send({
