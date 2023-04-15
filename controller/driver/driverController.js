@@ -1864,77 +1864,126 @@ const totalEarning = async (req, res) => {
 //     }
 // }
 
-const getOngoingRide = async(req,res)=>{
-    try {
-        // Get token from header (Authorization)
-        const token = req.headers.authorization.split(' ')[1]
-        // Decode token to get Driver Id
-        const decodeToken = jwt.decode(token)
-        const driverId = decodeToken.driverId
-        const findRides = await rideModel
-            .find({ driverId: driverId})
-            .sort({ rideStartTime: -1 }) // sort rides by descending order of start time
-            .limit(1) // limit the number of results to 1
-            .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
-            .populate({ path: 'driverId', select: ['fullName', 'profileImage'] })
-            .select({
-                _id:1,
-                pickupLocation: 1,
-                pickupLatitude: 1,
-                pickupLongitude:1,
-                destinationLocation: 1,
-                destinationLatitude:1,
-                destinationLongitude:1,
-                numberOfPassengers:1,
-                vehicleType:1,
-                fare: 1,
-                distance: 1,
-                paymentMethod: 1,
-                status:1,
-                rideStartTime:1
-            });
+// const getOngoingRide = async(req,res)=>{
+//     try {
+//         // Get token from header (Authorization)
+//         const token = req.headers.authorization.split(' ')[1]
+//         // Decode token to get Driver Id
+//         const decodeToken = jwt.decode(token)
+//         const driverId = decodeToken.driverId
+//         const findRides = await rideModel
+//             .find({ driverId: driverId})
+//             .sort({ rideStartTime: -1 }) // sort rides by descending order of start time
+//             .limit(1) // limit the number of results to 1
+//             .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+//             .populate({ path: 'driverId', select: ['fullName', 'profileImage'] })
+//             .select({
+//                 _id:1,
+//                 pickupLocation: 1,
+//                 pickupLatitude: 1,
+//                 pickupLongitude:1,
+//                 destinationLocation: 1,
+//                 destinationLatitude:1,
+//                 destinationLongitude:1,
+//                 numberOfPassengers:1,
+//                 vehicleType:1,
+//                 fare: 1,
+//                 distance: 1,
+//                 paymentMethod: 1,
+//                 status:1,
+//                 rideStartTime:1
+//             });
 
-        if (findRides.length) {
-            const ride = findRides[0]; // use the first (and only) element of the array
-            res.status(200).send({
-                success: true,
-                Ongoing: true,
-                message: 'Ongoing Ride',
-                ride: {
-                    customerId:ride.customerId,
-                    driverId:ride.driverId._id,
-                    rideId:ride._id,
-                    pickupLocation:ride.pickupLocation,
-                    pickupLatitude:ride.pickupLatitude,
-                    pickupLongitude:ride.pickupLongitude,
-                    destinationLocation:ride.destinationLocation,
-                    destinationLatitude:ride.destinationLatitude,
-                    destinationLongitude:ride.destinationLongitude,
-                    numberOfPassengers:ride.numberOfPassengers,
-                    vehicleType:ride.vehicleType,
-                    fare:ride.fare,
-                    distance:ride.distance,
-                    paymentMethod:ride.paymentMethod,
-                    status:ride.status,
-                    rideStartTime:ride.rideStartTime
-                }
-            });
-        } else {
-            res.status(404).send({
-                success: false,
-                Ongoing: false,
-                message: 'Driver does not have any ongoing ride',
-            });
+//         if (findRides.length) {
+//             const ride = findRides[0]; // use the first (and only) element of the array
+//             res.status(200).send({
+//                 success: true,
+//                 Ongoing: true,
+//                 message: 'Ongoing Ride',
+//                 ride: {
+//                     customerId:ride.customerId,
+//                     driverId:ride.driverId._id,
+//                     rideId:ride._id,
+//                     pickupLocation:ride.pickupLocation,
+//                     pickupLatitude:ride.pickupLatitude,
+//                     pickupLongitude:ride.pickupLongitude,
+//                     destinationLocation:ride.destinationLocation,
+//                     destinationLatitude:ride.destinationLatitude,
+//                     destinationLongitude:ride.destinationLongitude,
+//                     numberOfPassengers:ride.numberOfPassengers,
+//                     vehicleType:ride.vehicleType,
+//                     fare:ride.fare,
+//                     distance:ride.distance,
+//                     paymentMethod:ride.paymentMethod,
+//                     status:ride.status,
+//                     rideStartTime:ride.rideStartTime
+//                 }
+//             });
+//         } else {
+//             res.status(404).send({
+//                 success: false,
+//                 Ongoing: false,
+//                 message: 'Driver does not have any ongoing ride',
+//             });
+//         }
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).send({
+//             success: false,
+//             message: 'Internal server error',
+//             error: error.message,
+//         });
+//     }
+// }
+
+const getOngoingRide = async (req, res) => {
+    try {
+        // Extract token from headers
+        const token = req.headers.authorization.split(' ')[1];
+
+        // Decode token to get customer ID
+        const decodedToken = jwt.decode(token);
+        const driverId = decodedToken.driverId;
+
+        // Find all rides of the customer
+        const rides = await rideModel.find({ driverId })
+            .populate({ path: 'customerId', select: ['fullName', 'profileImage'] })
+
+        if (rides.length === 0) {
+            return res.status(404).json({ message: "No rides found for the driver" });
         }
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({
-            success: false,
-            message: 'Internal server error',
-            error: error.message,
+
+        const lastRide = rides[rides.length - 1];
+
+        const details = {
+            customerId: lastRide.customerId,
+            driverId: lastRide.driverId,
+            rideId: lastRide._id,
+            pickupLocation: lastRide.pickupLocation,
+            pickupLatitude: lastRide.pickupLatitude,
+            pickupLongitude: lastRide.pickupLongitude,
+            destinationLocation: lastRide.destinationLocation,
+            destinationLatitude: lastRide.destinationLatitude,
+            destinationLongitude: lastRide.destinationLongitude,
+            numberOfPassengers: lastRide.numberOfPassengers,
+            vehicleType: lastRide.vehicleType,
+            fare: lastRide.fare,
+            distance: lastRide.distance,
+            paymentMethod: lastRide.paymentMethod,
+            status: lastRide.status,
+            rideStartTime: lastRide.startRide,
+        };
+
+        res.status(200).json({
+            message: "Last ride by driver",
+            data: details
         });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
     }
-}
+};
 
 //   get all compeleted and decline rides 
 const getAllRides = async (req, res) => {
