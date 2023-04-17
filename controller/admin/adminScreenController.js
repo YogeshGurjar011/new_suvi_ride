@@ -1,9 +1,12 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 //********** ADMIN CONTROLLER **********/
 const languagesModel = require('../../models/adminModel/adminScreenModel/adminAllLanguagesModel');
 const screensModel = require('../../models/adminModel/adminScreenModel/adminScreensModel');
 const fieldsModel = require('../../models/adminModel/adminScreenModel/adminFieldsModel');
 const vehicleTypeModel = require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
 const customerRidesModel = require('../../models/ridesModel/ridesModel');
+const adminLoginSchema = require('../../models/adminModel/adminScreenModel/adminLogin');
 // Add Language
 const addLanguages = async (req, res) => {
     try {
@@ -1147,6 +1150,107 @@ const adminGetAllRides = async (req, res) => {
   };
 
 
+const adminSignup = async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+  
+      // Check if admin already exists
+      const existingAdmin = await adminLoginSchema.findOne({ email });
+      if (existingAdmin) {
+        return res.status(409).json({ message: 'Admin already exists',existingAdmin });
+      }
+  
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      // Generate a JWT token
+      const token = jwt.sign({ email }, 'adminsecretkey', { expiresIn: '1h' });
+  
+      const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+
+      // Get the month name from the current date in IST
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      // Set the createdAt and rideStartTime fields
+    //   const createdAt = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+      const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+      const createdAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+      const lastLogin = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+      
+          
+      // Create a new admin with token, timestamp, and last login fields
+      const newAdmin = new adminLoginSchema({
+        username,
+        email,
+        password: hashedPassword,
+        token,
+        createdAt: createdAt,
+        updatedAt:updatedAt,
+        lastLogin:lastLogin
+      });
+  
+      // Save the admin to the database
+      await newAdmin.save();
+      const adminData = {
+        username: newAdmin.username,
+        email: newAdmin.email,
+        lastLogin: newAdmin.lastLogin,
+        createdAt: newAdmin.createdAt,
+        updatedAt: newAdmin.updatedAt,
+        token:newAdmin.token
+      };
+      // Return success response with token
+      res.status(201).json({ message: 'Admin created successfully',adminData  });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
+
+
+  const adminLogin = async (req, res) => {
+    try {
+      const { emailOrUsername, password } = req.body;
+  
+      // Find admin by email or username
+      const admin = await adminLoginSchema.findOne({
+        $or: [{ email: emailOrUsername }, { username: emailOrUsername }]
+      });
+      if (!admin) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+  
+      // Check if password is correct
+      const isPasswordCorrect = await bcrypt.compare(password, admin.password);
+      if (!isPasswordCorrect) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+  
+       // Get the month name from the current date in IST
+      const nowIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const lastLogin = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+  
+      // Update last login timestamp
+      admin.lastLogin = lastLogin;
+      await admin.save();
+  
+      const adminData = {
+        username: admin.username,
+        email: admin.email,
+        lastLogin: admin.lastLogin,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+        token: admin.token
+      };
+      res.json({ message: 'Login successful', adminData });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
 module.exports = {
     addLanguages, getAllLanguages, languageGetById,editLanguage, deleteLanguage,
     addScreens, getAllScreens, editScreens,
@@ -1154,5 +1258,7 @@ module.exports = {
     getAllScreensByLanguage,getAllCustomerScreens,getAllDriverScreens,
     getCustomerScreensById,getDriverScreensById,addVehicleType,getAllvehicleType,deleteVehicalType,updateVehicleDetails,
     adminGetAllRides,
-    adminGetAllScreenDetails
+    adminGetAllScreenDetails,
+    adminSignup,
+    adminLogin
 }
