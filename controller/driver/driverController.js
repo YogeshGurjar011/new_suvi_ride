@@ -1671,80 +1671,163 @@ const reachedToDestination = async (req, res) => {
 // };
 
 
+// const endRide = async (req, res) => {
+//     try {
+//         // Get token from header (Authorization)
+//         const token = req.headers.authorization.split(' ')[1]
+//         // Decode token to get Driver Id
+//         const decodeToken = jwt.decode(token)
+//         const driverId = decodeToken.driverId
+//         // const driverId = req.body.driverId
+//         const _id = req.body.ride_id;
+//         const findRide = await rideModel.findById({_id:_id});
+//         if (!findRide) {
+//             return res.status(404).send({
+//                 success: false,
+//                 message: "Ride not found"
+//             });
+//         }
+//         // Check if the ride was ongoing
+//         if (findRide.status !== "Ongoing") {
+//             return res.status(400).send({
+//                 success: false,
+//                 message: "This ride is not ongoing"
+//             });
+//         }
+//         // Check if the payment was made
+//         // if (findRide.paymentStatus !== "Paid") {
+//         //     return res.status(400).send({
+//         //         success: false,
+//         //         message: "Payment for this ride is still pending"
+//         //     });
+//         // }
+//         // // calculating distance between pickup and destination location using geolib library of javascript
+//         // const pickupLocationLatLong = { latitude: findRide.pickupLatitude, longitude: findRide.pickupLongitude };
+//         // const destinationLocationLatLOng = { latitude: findRide.destinationLatitude, longitude: findRide.destinationLongitude };
+//         // // Calculate the fare for the ride
+//         // const distanceTraveled = calculateDistance(pickupLocationLatLong, destinationLocationLatLOng);
+//         // const baseFare = 10; // Set your base fare here
+//         // const perMileRate = 1.5; // Set your per-mile rate here
+//         // const fare = baseFare + (perMileRate * distanceTraveled);
+//         // Update the ride status and fare
+//         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// // Set the createdAt and rideStartTime fields
+// const rideEndTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+// const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+
+//         const filter = { _id }
+//         const update = { status: "Completed", rideEndTime:rideEndTime, updatedAt:updatedAt };
+//         const options = { new: true };
+//         const rideEnded = await rideModel.findByIdAndUpdate(filter, update, options);
+//         if (rideEnded) {
+//             const driverFilter = { _id: driverId }
+//             const driverUpdate = { isAvailable: true };
+//             const options = { new: true };
+//             await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, options);
+//             res.status(200).send({
+//                 success: true,
+//                 message: "Ride ended successfully",
+//                 //finalFare: fare,
+//                 nextScreen: 'make_payment'
+//             });
+//         } else {
+//             res.status(400).send({
+//                 success: false,
+//                 message: "Ride not ended"
+//             });
+//         }
+//     } catch (error) {
+//         res.status(500).send({
+//             success: false,
+//             message: "Internal server error",
+//             error: error.message
+//         });
+//     }
+// };
+
 const endRide = async (req, res) => {
     try {
-        // Get token from header (Authorization)
-        const token = req.headers.authorization.split(' ')[1]
-        // Decode token to get Driver Id
-        const decodeToken = jwt.decode(token)
-        const driverId = decodeToken.driverId
-        // const driverId = req.body.driverId
-        const _id = req.body.ride_id;
-        const findRide = await rideModel.findById({_id:_id});
-        if (!findRide) {
-            return res.status(404).send({
-                success: false,
-                message: "Ride not found"
-            });
-        }
-        // Check if the ride was ongoing
-        if (findRide.status !== "Ongoing") {
-            return res.status(400).send({
-                success: false,
-                message: "This ride is not ongoing"
-            });
-        }
-        // Check if the payment was made
-        // if (findRide.paymentStatus !== "Paid") {
-        //     return res.status(400).send({
-        //         success: false,
-        //         message: "Payment for this ride is still pending"
-        //     });
-        // }
-        // // calculating distance between pickup and destination location using geolib library of javascript
-        // const pickupLocationLatLong = { latitude: findRide.pickupLatitude, longitude: findRide.pickupLongitude };
-        // const destinationLocationLatLOng = { latitude: findRide.destinationLatitude, longitude: findRide.destinationLongitude };
-        // // Calculate the fare for the ride
-        // const distanceTraveled = calculateDistance(pickupLocationLatLong, destinationLocationLatLOng);
-        // const baseFare = 10; // Set your base fare here
-        // const perMileRate = 1.5; // Set your per-mile rate here
-        // const fare = baseFare + (perMileRate * distanceTraveled);
-        // Update the ride status and fare
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-// Set the createdAt and rideStartTime fields
-const rideEndTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
-const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
-
-        const filter = { _id }
-        const update = { status: "Completed", rideEndTime:rideEndTime, updatedAt:updatedAt };
-        const options = { new: true };
-        const rideEnded = await rideModel.findByIdAndUpdate(filter, update, options);
-        if (rideEnded) {
-            const driverFilter = { _id: driverId }
-            const driverUpdate = { isAvailable: true };
-            const options = { new: true };
-            await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, options);
-            res.status(200).send({
-                success: true,
-                message: "Ride ended successfully",
-                //finalFare: fare,
-                nextScreen: 'make_payment'
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                message: "Ride not ended"
-            });
-        }
-    } catch (error) {
-        res.status(500).send({
-            success: false,
-            message: "Internal server error",
-            error: error.message
+      // Get token from header (Authorization)
+      const token = req.headers.authorization.split(' ')[1]
+      // Decode token to get Driver Id
+      const decodeToken = jwt.decode(token)
+      const driverId = decodeToken.driverId
+      // const driverId = req.body.driverId
+      const _id = req.body.ride_id;
+      const findRide = await rideModel.findById({ _id: _id });
+      if (!findRide) {
+        return res.status(404).send({
+          success: false,
+          message: "Ride not found"
         });
+      }
+      // Check if the ride was ongoing
+      if (findRide.status !== "Ongoing") {
+        return res.status(400).send({
+          success: false,
+          message: "This ride is not ongoing"
+        });
+      }
+    
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const rideEndTime = new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata" });
+      const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", timeZone: "Asia/Kolkata" });
+  
+      const filter = { _id }
+      const update = { status: "Completed", rideEndTime: rideEndTime, updatedAt: updatedAt };
+      const options = { new: true };
+      const rideEnded = await rideModel.findByIdAndUpdate(filter, update, options);
+      if (rideEnded) {
+        const driverFilter = { _id: driverId }
+        const driverUpdate = { isAvailable: true };
+        const options = { new: true };
+        await driverBasicDetailsMOdel.findByIdAndUpdate(driverFilter, driverUpdate, options);
+          // Send push notification to customer
+      const customerId = rideEnded.customerId;
+      const customer = await customerBasicDetailsModel.findById(customerId);
+      if (!customer) {
+        return res.status(404).send({
+          success: false,
+          message: "Customer not found"
+        });
+      }
+        // Send push notification to customer
+        const customerToken = customer.fcmToken;
+        const payload = {
+          notification: {
+            title: 'Ride Completed',
+            body: 'Your ride has been completed. Please make payment to continue using our services.'
+          },
+          data: {
+            rideId: findRide._id.toString(),
+            nextScreen: 'make_payment'
+          }
+        };
+      const messageResponse =   await app2Messaging.sendToDevice(customerToken, payload);
+      console.log(messageResponse, customerToken,payload)
+  
+        res.status(200).send({
+          success: true,
+          message: "Ride ended successfully",
+          //finalFare: fare,
+          nextScreen: 'make_payment'
+        });
+      } else {
+        res.status(400).send({
+          success: false,
+          message: "Ride not ended"
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        message: "Internal server error",
+        error: error.message
+      });
     }
-};
+  };
+
 
 // Driver Ratting for customer 
 const driverRatting = async (req, res) => {
