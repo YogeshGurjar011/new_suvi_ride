@@ -1887,7 +1887,7 @@ const endRide = async (req, res) => {
     }
 
     // Update driver availability status
-    const updatedDriver = await driverBasicDetailsModel.findByIdAndUpdate(
+    const updatedDriver = await driverBasicDetailsMOdel.findByIdAndUpdate(
       driverId,
       { isAvailable: true },
       { new: true }
