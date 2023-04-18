@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const router = express.Router();
 const adminScreenCntroller = require('../../controller/admin/adminScreenController');
+const adminValidation = require('../../middeleware_functions/adminValidation');
 const path = require('path');
 //const customerValidation = require('../token_validation/customerTokenValidation');
 router.use(function(req,res,next){
@@ -28,6 +29,9 @@ router.post('/admin/addLanguages',adminScreenCntroller.addLanguages);
 
 // Get All LAnguages
 router.get('/admin/getAllLanguages',adminScreenCntroller.getAllLanguages);
+
+// Get Active languages
+router.get('/admin/getActiveLanguages',adminScreenCntroller.getActiveLanguages);
 
 // Get Lanugage By Id
 router.get('/admin/languageGetById/:_id',adminScreenCntroller.languageGetById);
@@ -94,6 +98,13 @@ router.get('/admin/adminGetAllRides',adminScreenCntroller.adminGetAllRides);
 
 // admin get all label code
 router.get('/admin/adminGetAllScreenDetails/:appScreens/:screenName',adminScreenCntroller.adminGetAllScreenDetails);
+
+
+// admin Login And singup
+
+router.post('/admin/adminSignup',adminScreenCntroller.adminSignup);
+
+router.post('/admin/adminLogin',adminScreenCntroller.adminLogin);
 
 
 module.exports = router;
