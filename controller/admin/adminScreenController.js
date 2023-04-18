@@ -91,6 +91,40 @@ const getAllLanguages = async (req, res) => {
     }
 }
 
+// Get Active languages
+const getActiveLanguages = (req, res) => {
+    new Promise((resolve, reject) => {
+      languagesModel.find({status: 'active'}).exec((error, result) => {
+        if (error) {
+          reject({
+            success: false,
+            successCode: 400,
+            error: error.message
+          });
+        } else {
+          resolve({
+            success: true,
+            successCode: 200,
+            data: result,
+            message: 'All Languages'
+          });
+        }
+      });
+    })
+    .then((response) => {
+      res.status(200).send(response);
+    })
+    .catch((error) => {
+      res.status(500).send({
+        success: false,
+        successCode: 500,
+        message: 'Internal Server Error',
+        error: error.message
+      });
+    });
+  };
+
+
 // Get All Language By Id
 const languageGetById = async(req,res)=>{
     try {
@@ -1260,5 +1294,6 @@ module.exports = {
     adminGetAllRides,
     adminGetAllScreenDetails,
     adminSignup,
-    adminLogin
+    adminLogin,
+    getActiveLanguages
 }
