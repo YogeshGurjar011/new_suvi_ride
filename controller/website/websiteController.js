@@ -86,7 +86,7 @@ const showFareToUsers = async (req, res) => {
         vehicleImage: `https://rslsofttech.com:7000/${vehicle.uploadVehicleImage}`,
         fare,
         distance,
-        duration: time,
+        time: time,
       };
       fareOfVehicles.push(allVehicles);
     }
