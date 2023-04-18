@@ -90,7 +90,6 @@ const showFareToUsers = async (req, res) => {
       };
       fareOfVehical.push({ allVehicles });
     }
-
     res.status(200).json({
       success: true,
       message: 'All Available Rides',
