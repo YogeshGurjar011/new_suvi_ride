@@ -75,7 +75,7 @@ const showFareToUsers = async (req, res) => {
 
     // Calculate the distance and duration between the pickup location and the dropoff location
     const distance = getDistanceFromLatLonInKm(pickupLatitude, pickupLongitude, destinationLatitude, destinationLongitude);
-   // const durationToDropoff = Math.round((distance / 30) * 60);  // Assuming an average speed of 30 km/h
+    const time = Math.round((distance / 30) * 60);  // Assuming an average speed of 30 km/h
 
     // Calculate the fare for each vehicle type
     const fare = [];
@@ -86,7 +86,7 @@ const showFareToUsers = async (req, res) => {
         vehicleImage: `https://rslsofttech.com:7000/${vehicle.uploadVehicleImage}`,
         fare,
         distance,
-        duration: durationToDropoff,
+        duration: time,
       };
       fare.push({ allVehicles });
     }
