@@ -1,4 +1,5 @@
 const rideModel = require('../../models/ridesModel/ridesModel');
+const VehicleTypeModel= require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
 const haversine = require('haversine');
 
 const toRadians = (degrees) => {
@@ -64,7 +65,7 @@ const showFareToUsers = async (req, res) => {
     const vehicleDetails = {};
 
     // Fetch the fare rates and base fare for all vehicles
-    const vehicles = await VehicleTypeWithFareModel.find({});
+    const vehicles = await VehicleTypeModel.find({});
     for (const vehicle of vehicles) {
       vehicleDetails[vehicle.name] = {
         baseFare: vehicle.baseFare,
