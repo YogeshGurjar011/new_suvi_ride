@@ -96,6 +96,9 @@ router.put('/admin/updateVehicleDetails/:_id',upload.single('uploadVehicleImage'
 // adminGetAllRides
 router.get('/admin/adminGetAllRides',adminScreenCntroller.adminGetAllRides);
 
+// admin get rides with status
+router.get('/admin/adminGetRidesWithStatus',adminScreenCntroller.adminGetRidesWithStatus);
+
 // admin get all label code
 router.get('/admin/adminGetAllScreenDetails/:appScreens/:screenName',adminScreenCntroller.adminGetAllScreenDetails);
 
