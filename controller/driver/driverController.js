@@ -2729,7 +2729,7 @@ const acceptRideRequest = async (req, res) => {
                         pickupLocation: findRideStatus.pickupLocation,
                         destinationLocation: findRideStatus.destinationLocation,
                         paymentMethod: findRideStatus.paymentMethod,
-                         confirmOtp: rideAccepted.confirmOtp,
+                        confirmOtp: rideAccepted.confirmOtp,
                         message: "Ride accepted successfully",
                         nextScreen: "Navigate to pickup point Screen",
                     });
