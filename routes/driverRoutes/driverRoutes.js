@@ -51,6 +51,8 @@ router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
 
 router.patch('/driver/updatePersonalDetails',driverValidation,upload.single('profilePhoto'),driverController.updatePersonalDetails);
 
+router.delete('/driver/deleteDriver/:_id',driverController.deleteDriver);
+
 router.post('/driver/acceptRideRequest',driverValidation,driverController.acceptRideRequest);
 
 router.post('/driver/declineRideRequest',driverValidation,driverController.declineRideRequest);
@@ -84,6 +86,8 @@ router.get('/driver/getTotalRidesWithStatus',driverValidation,driverController.g
 //===================================================================================
 
 router.post('/website/getFare',websiteController.getFare);
+
+router.post('/website/showFareToUsers',websiteController.showFareToUsers);
 
 
 

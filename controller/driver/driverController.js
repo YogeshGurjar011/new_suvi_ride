@@ -248,7 +248,7 @@ const driverLogin = async (req, res) => {
         message: "Please provide a valid fcmToken.",
       });
     }
-    const result = await driverBasicDetailsMOdel.findOne({ mobileNumber });
+    const result = await driverBasicDetailsMOdel.findOne({ mobileNumber:mobileNumber });
     if (!result) {
       const newDriver = new driverBasicDetailsMOdel({
         mobileNumber: mobileNumber,
@@ -1073,36 +1073,31 @@ const updateDriverCurrentLocation = async (req, res) => {
     }
 };
 
-
 // Delete Driver
 const deleteDriver = async (req, res) => {
     try {
-        const _id = req.params._id
-        const result = await driverBasicDetailsMOdel.findByIdAndDelete({ _id })
-        if (result) {
-            res.status(200).send({
-                success: true,
-                successCode: 200,
-                data: result,
-                message: 'Driver deleted successfully'
-            })
-        }
-        else {
-            res.status(404).send({
-                success: false,
-                successCode: 404,
-                message: 'Deriver not found with this id'
-            })
-        }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            successCode: 500,
-            message: 'Internal Server Error',
-            error: error.message,
+      const driverId = req.params._id;
+      const findDriver = await driverBasicDetailsMOdel.findByIdAndDelete(driverId);
+      if (!findDriver) {
+        res.status(400).send({
+          success: false,
+          message: "Unable to delete driver with this ID",
         });
+      } else {
+        res.status(200).send({
+          success: true,
+          message: "Driver deleted successfully",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
     }
-}
+  };
 
 //Accept Ride Request 
 // const acceptRideRequest = async (req, res) => {
@@ -1484,7 +1479,6 @@ const enterOtp = async(req,res)=>{
     }
 
 }
-
 
 // start ride 
 const startRide = async (req, res) => {
@@ -2059,6 +2053,7 @@ const updatePersonalDetails = async (req, res) => {
         })
     }
 }
+
 
 // Write to Us
 const writeToUs = async (req, res) => {
