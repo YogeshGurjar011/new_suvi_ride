@@ -1,7 +1,8 @@
+const nodemailer = require('nodemailer'); 
+const haversine = require('haversine');
 const rideModel = require('../../models/ridesModel/ridesModel');
 const VehicleTypeModel= require('../../models/adminModel/adminScreenModel/adminVehicalTypeModel');
-const haversine = require('haversine');
-
+const contactUsModel = require('../../models/websiteContactUsModel');
 const toRadians = (degrees) => {
   return degrees * Math.PI / 180;
 };
@@ -57,7 +58,7 @@ const getFare = async (req, res) => {
 };
 
 
-//
+// show all vehicals to the user
 
 const showFareToUsers = async (req, res) => {
   try {
@@ -125,7 +126,87 @@ function deg2rad(deg) {
 
 
 
+// contact box website
+const contactUs = async (req, res) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      requireTLS: true,
+      secure: false,
+      auth: {
+        user: "py132430@gmail.com",
+        pass: "Indore@12345",
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+    const mailOptions = {
+      from: "py132430@gmail.com",
+      to: "py132430@gmail.com",
+      subject: "Contact Us",
+      html: `
+        <p>You have received a new email from suvi website.</p>
+        <table style="width:50%">
+          <tr>
+            <td><b>Name</b></td>
+            <td>${req.body.name}</td>
+          </tr>
+          <tr>
+            <td><b>Email</b></td>
+            <td>${req.body.email}</td>
+          </tr>
+          <tr>
+            <td><b>Subject</b></td>
+            <td>${req.body.subject}</td>
+          </tr>
+          <tr>
+            <td><b>Message</b></td>
+            <td>${req.body.message}</td>
+          </tr>
+        </table>
+      `,
+    };
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        res.status(400).send({
+          success: false,
+          message: "Mail not sent",
+        });
+      } else {
+        const customerMail = new contactUsModel({
+          Name: req.body.name,
+          Email: req.body.email,
+          Subject: req.body.subject,
+          Message: req.body.message,
+        });
+        customerMail.save((err, finalResult) => {
+          if (err) {
+            res.status(500).send({
+              success: false,
+              message: "Error in saving the contact message",
+              error: err.message,
+            });
+          } else {
+            res.status(200).send({
+              success: true,
+              message: "Mail sent successfully",
+              newUser: finalResult,
+            });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
-  getFare,showFareToUsers
+  getFare,showFareToUsers,contactUs
 };

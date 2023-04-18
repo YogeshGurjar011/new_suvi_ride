@@ -89,6 +89,7 @@ router.post('/website/getFare',websiteController.getFare);
 
 router.post('/website/showFareToUsers',websiteController.showFareToUsers);
 
+router.post('/website/contactUs',websiteController.contactUs);
 
 
 module.exports = router;
