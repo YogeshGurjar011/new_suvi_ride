@@ -61,7 +61,7 @@ const getFare = async (req, res) => {
 
 const showFareToUsers = async (req, res) => {
   try {
-    const { pickupLocation,pickupLatitude, pickupLongitude, destinationLocation,destinationLatitude, destinationLongitude } = req.body;
+    const { pickupLocation, pickupLatitude, pickupLongitude, destinationLocation, destinationLatitude, destinationLongitude } = req.body;
     const vehicleDetails = {};
 
     // Fetch the fare rates and base fare for all vehicles
@@ -78,7 +78,7 @@ const showFareToUsers = async (req, res) => {
     const time = Math.round((distance / 30) * 60);  // Assuming an average speed of 30 km/h
 
     // Calculate the fare for each vehicle type
-    const fareOfVehical = [];
+    const fareOfVehicles = [];
     for (const vehicle of vehicles) {
       const fare = Math.round(vehicle.baseFare + (distance * vehicle.perKmCharge));
       const allVehicles = {
@@ -88,19 +88,20 @@ const showFareToUsers = async (req, res) => {
         distance,
         duration: time,
       };
-      fareOfVehical.push({ allVehicles });
+      fareOfVehicles.push(allVehicles);
     }
+
     res.status(200).json({
       success: true,
       message: 'All Available Rides',
-      data: fare
+      data: fareOfVehicles
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false, 
       message: 'Internal server error',
-      error:error.message 
+      error: error.message 
     });
   }
 };
@@ -121,6 +122,7 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 function deg2rad(deg) {
   return deg * (Math.PI / 180)
 }
+
 
 
 
