@@ -1343,6 +1343,71 @@ const adminSignup = async (req, res) => {
     }
   };
 
+// get customer details by id
+const adminGetAllRidesByCustomer = async (req, res) => {
+    try {
+      const customerId = req.params._id;
+  
+      // Find all rides of the customer
+      const rides = await customerRidesModel.find({ customerId })
+      .populate({ path: 'customerId', select: 'fullName' })
+      .populate({ path: 'driverId', select: 'drivingLicence.fullName' })
+      .exec();
+  
+      if (rides.length === 0) {
+        return res.status(404).json({ message: "No rides found for the customer" });
+      }
+  
+      const details = await Promise.all(rides.map(async (ride) => {
+        // Find driver details of each ride
+    
+        let statusColor;
+        switch (ride.status) {
+          case 'Completed':
+            statusColor = 'green';
+            break;
+          case 'Ongoing':
+            statusColor = 'yellow';
+            break;
+          case 'Decline':
+            statusColor = 'red';
+            break;
+          case 'requested':
+            statusColor = 'blue';
+            break;
+          default:
+            statusColor = 'gray';
+            break;
+        }
+  
+        const statusButton = `<button style="background-color: ${statusColor}; border-radius: 6px; color: #FFFFFF; font-family: Roboto; font-style: normal; font-weight: 500; font-size: 12px; line-height: 14px; width: 100px; height: 30px;">${ride.status}</button>`;
+  
+        return {
+          _id: ride._id,
+         
+          rider_name: ride.customerId ? ride.customerId.fullName : 'Unknown',
+          driver_name: ride.driverId ? ride.driverId.drivingLicence.fullName : 'Unknown',
+          fare: ride.fare,
+          scheduledDate: ride.scheduledDate,
+          status: statusButton,
+          createdAt: ride.createdAt,
+          pickup_address: `<span style="height: 10px; width: 10px; background-color: green; border-radius: 50%; display: inline-block;"></span> ${ride.pickupLocation}`,
+          dropoff_address: `<span style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block;"></span> ${ride.destinationLocation}`
+        };
+      }));
+  
+      res.status(200).json({
+        message: "All rides by customer",
+        count: details.length,
+        data: details
+      });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Server error.' });
+    }
+  };
+
 module.exports = {
     addLanguages, getAllLanguages, languageGetById,editLanguage, deleteLanguage,
     addScreens, getAllScreens, editScreens,
@@ -1354,5 +1419,6 @@ module.exports = {
     adminSignup,
     adminLogin,
     getActiveLanguages,
-    adminGetRidesWithStatus
+    adminGetRidesWithStatus,
+    adminGetAllRidesByCustomer
 }
