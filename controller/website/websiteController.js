@@ -78,7 +78,7 @@ const showFareToUsers = async (req, res) => {
     const time = Math.round((distance / 30) * 60);  // Assuming an average speed of 30 km/h
 
     // Calculate the fare for each vehicle type
-    const fare = [];
+    const fareOfVehical = [];
     for (const vehicle of vehicles) {
       const fare = Math.round(vehicle.baseFare + (distance * vehicle.perKmCharge));
       const allVehicles = {
@@ -88,7 +88,7 @@ const showFareToUsers = async (req, res) => {
         distance,
         duration: time,
       };
-      fare.push({ allVehicles });
+      fareOfVehical.push({ allVehicles });
     }
 
     res.status(200).json({
