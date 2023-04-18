@@ -109,5 +109,8 @@ router.post('/admin/adminSignup',adminScreenCntroller.adminSignup);
 
 router.post('/admin/adminLogin',adminScreenCntroller.adminLogin);
 
+// get cutomer details by id
+router.get('/admin/adminGetAllRidesByCustomer/:_id',adminScreenCntroller.adminGetAllRidesByCustomer);
+
 
 module.exports = router;
