@@ -1131,6 +1131,64 @@ const adminGetAllRides = async (req, res) => {
     }
   };
 
+// admin get all rides with diffrent status
+const adminGetRidesWithStatus = async (req, res) => {
+    try {
+      const rides = await customerRidesModel.find({})
+        .populate({ path: 'customerId', select: 'fullName' })
+        .populate({ path: 'driverId', select: 'drivingLicence.fullName' })
+        .exec();
+  
+      if (rides.length === 0) {
+        return res.status(404).json({
+          message: 'No rides available',
+        });
+      }
+  
+      const filteredRides = rides.filter(ride => ["Completed", "Decline", "Ongoing"].includes(ride.status));
+  
+      const rideDetails = {
+        completed_rides: 0,
+        decline_rides: 0,
+        ongoing_rides: 0
+      };
+  
+      filteredRides.forEach((ride) => {
+        switch (ride.status) {
+          case 'Completed':
+            rideDetails.completed_rides++;
+            break;
+          case 'Decline':
+            rideDetails.decline_rides++;
+            break;
+          case 'Ongoing':
+            rideDetails.ongoing_rides++;
+            break;
+          default:
+            break;
+        }
+      });
+  
+      return res.status(200).json({
+        message: 'All Rides',
+        total_rides:rides.length,
+        completed_rides: rideDetails.completed_rides,
+        decline_rides: rideDetails.decline_rides,
+        ongoing_rides: rideDetails.ongoing_rides
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        successCode: 500,
+        message: 'Internal Server Error',
+        error: error.message,
+      });
+    }
+  };
+
+
+
  // get label code
   const adminGetAllScreenDetails = (req, res) => {
     return new Promise((resolve, reject) => {
@@ -1295,5 +1353,6 @@ module.exports = {
     adminGetAllScreenDetails,
     adminSignup,
     adminLogin,
-    getActiveLanguages
+    getActiveLanguages,
+    adminGetRidesWithStatus
 }
