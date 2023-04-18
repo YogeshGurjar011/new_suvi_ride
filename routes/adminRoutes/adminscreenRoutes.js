@@ -30,6 +30,9 @@ router.post('/admin/addLanguages',adminScreenCntroller.addLanguages);
 // Get All LAnguages
 router.get('/admin/getAllLanguages',adminScreenCntroller.getAllLanguages);
 
+// Get Active languages
+router.get('/admin/getActiveLanguages',adminScreenCntroller.getActiveLanguages);
+
 // Get Lanugage By Id
 router.get('/admin/languageGetById/:_id',adminScreenCntroller.languageGetById);
 
