@@ -84,9 +84,9 @@ const showFareToUsers = async (req, res) => {
       const allVehicles = {
         vehicleName: vehicle.name,
         vehicleImage: `https://rslsofttech.com:7000/${vehicle.uploadVehicleImage}`,
-        fare,
+        fare:`${fare} rupees`,
         distance,
-        time: time,
+        time: `${time} min`,
       };
       fareOfVehicles.push(allVehicles);
     }
