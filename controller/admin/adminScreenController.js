@@ -1084,16 +1084,16 @@ const adminGetAllRides = async (req, res) => {
       const rideDetails = rides.map((ride) => {
         let statusColor;
         switch (ride.status) {
-          case 'completed':
+          case 'Completed':
             statusColor = 'green';
             break;
-          case 'cancelled':
+          case 'Decline':
             statusColor = 'red';
             break;
-          case 'in_progress':
+          case 'Accepted':
             statusColor = 'blue';
             break;
-          case 'ongoing':
+          case 'Ongoing':
             statusColor = 'yellow';
             break;
           default:
