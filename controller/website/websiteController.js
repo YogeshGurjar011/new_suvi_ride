@@ -136,7 +136,7 @@ const contactUs = async (req, res) => {
       secure: false,
       auth: {
         user: "py132430@gmail.com",
-        pass: "Indore@12345",
+        pass: "Indore@1234",
       },
       tls: {
         rejectUnauthorized: false,

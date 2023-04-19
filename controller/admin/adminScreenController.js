@@ -882,6 +882,9 @@ const addVehicleType = async (req, res) => {
 const getAllvehicleType = async(req,res)=>{
     try {
         const result = await vehicleTypeModel.find({},{uploadVehicleImage:1,name:1,baseFare:1,farePerMin:1,seats:1,createdAt:1,status:1});
+        result.forEach((vehicleType) => {
+            vehicleType.uploadVehicleImage = `https://rslsofttech.com:7000/${vehicleType.uploadVehicleImage}`;
+        });
         if(!result.length){
             res.status(404).send({
                 success:false,
@@ -907,6 +910,7 @@ const getAllvehicleType = async(req,res)=>{
         });
     }
 }
+
 
 // Delete vehicle Type
 const deleteVehicalType = async(req,res)=>{
