@@ -136,7 +136,7 @@ const contactUs = async (request, response) => {
       secure: false,
       auth: {
         user: 'hr@rslsofttech.com',
-        pass: 'hfekjfefef'
+        pass: 'upennynhqtgpdybp'
       },
       tls: {
         rejectUnauthorized: false
