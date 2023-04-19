@@ -932,9 +932,57 @@ const checkDriverDocumentsVerificationByAdmin = async (req, res) => {
 }
 
 // update driver status
+// const updateDriverStatus = async (req, res) => {
+//     try {
+//         const { _id } = req.params; // assuming the driver ID is passed as a parameter in the request URL
+//         if (!_id) {
+//             return res.status(400).send({ message: 'Please provide driver id' });
+//         }
+//         if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
+//             return res.status(400).send({ message: 'The driver status can be online or offline' })
+//         }
+//         const id = { _id }
+//         const update = {
+//             $set: {
+//                 'Status': req.body.Status
+//             }
+//         }
+//         const options = { new: true }
+//         const result = await driverBasicDetailsMOdel.findOneAndUpdate(id, update, options);
+//         if (result) {
+//             res.status(200).send({
+//                 success: true,
+//                 //successCode: 200,
+//                 Status: result.Status,
+//                 message: 'driver status updated successfully'
+//             })
+//         }
+//         else {
+//             res.status(404).send({
+//                 success: false,
+//                 successCode: 404,
+//                 message: 'data not found with this id'
+//             })
+//         }
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             successCode: 500,
+//             message: 'Internal Server Error',
+//             error: error.message,
+//         });
+//     }
+// }
+
+// update driver status
 const updateDriverStatus = async (req, res) => {
     try {
-        const { _id } = req.params; // assuming the driver ID is passed as a parameter in the request URL
+          // Get token from header (Authorication)
+          const token = req.headers.authorization.split(' ')[1];
+
+          // Decode token to get driver id
+          const decodedToken = jwt.decode(token);
+          const _id = decodedToken.driverId;// assuming the driver ID is passed as a parameter in the request URL
         if (!_id) {
             return res.status(400).send({ message: 'Please provide driver id' });
         }
