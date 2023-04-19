@@ -1579,12 +1579,12 @@ const updatedAt = new Date().toLocaleString("en-US", { month: "long", day: "nume
         };
         try {
           const response = await app1Messaging.sendToDevice(deviceToken, message);
-          console.log(`Message sent to ${driver.mobilenumber}:`, response)
+          console.log(`Message sent to ${driver.mobileNumber}:`, response)
           driverAccepted = true;
 
         } catch (error) {
           console.error('Error sending FCM message:', error);
-          console.log(`Error sending message to ${driver.mobilenumber}:`, error);
+          console.log(`Error sending message to ${driver.mobileNumber}:`, error);
         }
       }
       nearestDrivers.forEach(async (driver) => {

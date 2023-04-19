@@ -96,6 +96,9 @@ router.put('/admin/updateVehicleDetails/:_id',upload.single('uploadVehicleImage'
 // adminGetAllRides
 router.get('/admin/adminGetAllRides',adminScreenCntroller.adminGetAllRides);
 
+// admin get rides with status
+router.get('/admin/adminGetRidesWithStatus',adminScreenCntroller.adminGetRidesWithStatus);
+
 // admin get all label code
 router.get('/admin/adminGetAllScreenDetails/:appScreens/:screenName',adminScreenCntroller.adminGetAllScreenDetails);
 
@@ -105,6 +108,9 @@ router.get('/admin/adminGetAllScreenDetails/:appScreens/:screenName',adminScreen
 router.post('/admin/adminSignup',adminScreenCntroller.adminSignup);
 
 router.post('/admin/adminLogin',adminScreenCntroller.adminLogin);
+
+// get cutomer details by id
+router.get('/admin/adminGetAllRidesByCustomer/:_id',adminScreenCntroller.adminGetAllRidesByCustomer);
 
 
 module.exports = router;
