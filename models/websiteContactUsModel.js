@@ -3,10 +3,10 @@ const contactUsSchema = new mongoose.Schema({
     name:{
         type:String
     },
-    email:{
-        type:String
+    mobileNumber:{
+        type:Number
     },
-    subject:{
+    email:{
         type:String
     },
     message:{

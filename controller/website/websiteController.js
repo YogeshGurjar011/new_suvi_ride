@@ -136,7 +136,7 @@ const contactUs = async (request, response) => {
       secure: false,
       auth: {
         user: 'hr@rslsofttech.com',
-        pass: 'upennynhqtgpdybp'
+        pass: 'hfekjfefef'
       },
       tls: {
         rejectUnauthorized: false
@@ -147,59 +147,55 @@ const contactUs = async (request, response) => {
       to: 'hr@rslsofttech.com',
       subject: `Contact Us`,
       html: `
-      <p>You received new eamil from rsl website.</p>
+      <p>You received new email from rsl website.</p>
       <table style="width:50%">
       <tr>
         <td><b>Name</b></td>
         <td>${request.body.name}</td>
-      
       </tr>
       <tr>
-      <td><b>Email</b></td>
-      <td>${request.body.email}</td>
-    
-    </tr>
-    <tr>
-    <td><b>Subject</b></td>
-    <td>${request.body.subject}</td>
-  </tr>
-  <tr>
-  <tr>
-  <td><b>Message</b></td>
-  <td>${request.body.message}</td>
-  
-  </tr>
+        <td><b>Mobile Number</b></td>
+        <td>${request.body.mobileNumber}</td>
+      </tr>
+      <tr>
+        <td><b>Email</b></td>
+        <td>${request.body.email}</td>
+      </tr>
+      <tr>
+        <td><b>Message</b></td>
+        <td>${request.body.message}</td>
+      </tr>
     </table>`
     };
     transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log(error);
-    } else {
-     
-      const user = new User({
-        name: request.body.name,
-        email:request.body.email,
-        phone:request.body.phone,
-        message:request.body.message,
-        candidates_resume:request.file.filename
-      })
-
-      user.save()
-      .then(result => {
-        response.status(200).send({success:true, msg: "successfully send mail",new_user:result})
-      }).catch(e => {
-        response.status(400).send({success:false,error:e});
-      })
-    }
-  });
+      if (error) {
+        console.log(error);
+        response.status(500).send({success:false, error: error.message});
+      } else {
+        const user = new contactUsModel({
+          name: request.body.name,
+          mobileNumber:request.body.mobileNumber,
+          email:request.body.email,
+          message:request.body.message
+        })
+        user.save()
+          .then(result => {
+            response.status(200).send({success:true, message: "Successfully sent email and saved user data", newUser:result})
+          })
+          .catch(e => {
+            response.status(400).send({success:false,error:e});
+          })
+      }
+    });
   } catch (error) {
-    res.status(500).send({
+    response.status(500).send({
       success: false,
       message: "Internal server error",
       error: error.message,
     });
   }
 };
+
 
 
 // import User from "../models/userModel.js";
