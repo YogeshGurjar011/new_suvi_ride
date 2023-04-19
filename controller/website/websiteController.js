@@ -63,6 +63,13 @@ const getFare = async (req, res) => {
 const showFareToUsers = async (req, res) => {
   try {
     const { pickupLocation, pickupLatitude, pickupLongitude, destinationLocation, destinationLatitude, destinationLongitude } = req.body;
+    // Check if pickup and destination locations are provided
+    if (!pickupLocation || !destinationLocation) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both pickup and destination locations'
+      });
+    }
     const vehicleDetails = {};
 
     // Fetch the fare rates and base fare for all vehicles
@@ -85,9 +92,9 @@ const showFareToUsers = async (req, res) => {
       const allVehicles = {
         vehicleName: vehicle.name,
         vehicleImage: `https://rslsofttech.com:7000/${vehicle.uploadVehicleImage}`,
-        fare:`${fare} rupees`,
+        fare:`${fare} Rs`,
         distance,
-        time: `${time} min`,
+        time: `${time} Min`,
       };
       fareOfVehicles.push(allVehicles);
     }
