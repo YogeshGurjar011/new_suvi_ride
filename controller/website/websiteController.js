@@ -127,7 +127,7 @@ function deg2rad(deg) {
 
 
 // contact box website
-const contactUs = async (req, res) => {
+const contactUs = async (request, response) => {
   try {
     var transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
