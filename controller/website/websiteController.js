@@ -135,7 +135,7 @@ const contactUs = async (req, res) => {
       requireTLS: true,
       secure: false,
       auth: {
-        user: "py132430@gmail.com",
+        user: "preeti@rslsofttech.com",
         pass: "Indore@1234",
       },
       tls: {
@@ -143,8 +143,8 @@ const contactUs = async (req, res) => {
       },
     });
     const mailOptions = {
-      from: "py132430@gmail.com",
-      to: "py132430@gmail.com",
+      from: "preeti@rslsofttech.com",
+      to: "preeti@rslsofttech.com",
       subject: "Contact Us",
       html: `
         <p>You have received a new email from suvi website.</p>
