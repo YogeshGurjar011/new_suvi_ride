@@ -986,7 +986,7 @@ const updateDriverStatus = async (req, res) => {
         if (!_id) {
             return res.status(400).send({ message: 'Please provide driver id' });
         }
-        if (req.body.Status !== 'online' || req.body.Status !== 'offline') {
+        if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
         const id = { _id }
@@ -1092,13 +1092,13 @@ const updateDriverCurrentLocation = async (req, res) => {
             });
         }
 
-        if (driver.Status !== 'online') {
-            return res.status(400).json({
-                success: false,
-                successCode: 400,
-                message: 'Driver is offline',
-            });
-        }
+//         if (driver.Status !== 'online') {
+//             return res.status(400).json({
+//                 success: false,
+//                 successCode: 400,
+//                 message: 'Driver is offline',
+//             });
+//         }
 
         // Update the driver's current location
         driver.currentLocation = {
