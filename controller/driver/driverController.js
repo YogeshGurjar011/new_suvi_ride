@@ -986,7 +986,7 @@ const updateDriverStatus = async (req, res) => {
         if (!_id) {
             return res.status(400).send({ message: 'Please provide driver id' });
         }
-        if (req.body.Status !== 'online' && req.body.Status !== 'offline') {
+        if (req.body.Status !== 'online' || req.body.Status !== 'offline') {
             return res.status(400).send({ message: 'The driver status can be online or offline' })
         }
         const id = { _id }
